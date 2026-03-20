@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Non Sequitur — System Architecture Map</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 32px; min-height: 100vh; }
+  h1 { color: #fff; font-size: 28px; margin-bottom: 4px; letter-spacing: -0.5px; }
+  .subtitle { color: #888; font-size: 14px; margin-bottom: 32px; }
+  .legend { display: flex; gap: 24px; margin-bottom: 28px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #aaa; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+  .dot-built { background: #22c55e; }
+  .dot-partial { background: #eab308; }
+  .dot-missing { background: #ef4444; }
+  .dot-conceptual { background: #8b5cf6; }
+
+  /* Company Stack - Vertical on the left */
+  .layout { display: grid; grid-template-columns: 220px 1fr; gap: 32px; }
+
+  .company-stack { display: flex; flex-direction: column; gap: 0; }
+  .stack-tier { padding: 16px 20px; border-left: 3px solid; position: relative; }
+  .stack-tier::after { content: '↓'; position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%); color: #555; font-size: 16px; }
+  .stack-tier:last-child::after { display: none; }
+  .stack-tier h3 { font-size: 15px; margin-bottom: 2px; }
+  .stack-tier p { font-size: 11px; color: #888; }
+  .tier-ns { border-color: #f59e0b; background: rgba(245,158,11,0.06); }
+  .tier-ns h3 { color: #f59e0b; }
+  .tier-ag { border-color: #8b5cf6; background: rgba(139,92,246,0.06); }
+  .tier-ag h3 { color: #8b5cf6; }
+  .tier-a3 { border-color: #06b6d4; background: rgba(6,182,212,0.06); }
+  .tier-a3 h3 { color: #06b6d4; }
+  .tier-yks { border-color: #22c55e; background: rgba(34,197,94,0.06); }
+  .tier-yks h3 { color: #22c55e; }
+
+  /* Main system flow */
+  .system-layers { display: flex; flex-direction: column; gap: 20px; }
+
+  .layer { border: 1px solid #222; border-radius: 10px; padding: 20px; position: relative; }
+  .layer-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .layer-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; padding: 3px 10px; border-radius: 4px; }
+  .layer-title { font-size: 16px; font-weight: 600; color: #fff; }
+
+  .layer-signal { border-color: #164e63; background: rgba(6,182,212,0.03); }
+  .layer-signal .layer-label { background: #164e63; color: #06b6d4; }
+
+  .layer-meaning { border-color: #3b0764; background: rgba(139,92,246,0.03); }
+  .layer-meaning .layer-label { background: #3b0764; color: #a78bfa; }
+
+  .layer-output { border-color: #422006; background: rgba(245,158,11,0.03); }
+  .layer-output .layer-label { background: #422006; color: #f59e0b; }
+
+  .layer-capability { border-color: #052e16; background: rgba(34,197,94,0.03); }
+  .layer-capability .layer-label { background: #052e16; color: #22c55e; }
+
+  .components { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .component { padding: 10px 14px; border-radius: 6px; border: 1px solid #333; background: #111118; font-size: 12px; }
+  .component .name { font-weight: 600; color: #fff; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
+  .component .detail { color: #777; font-size: 11px; line-height: 1.4; }
+  .component .repo { font-size: 10px; color: #555; margin-top: 4px; font-family: monospace; }
+
+  .status { display: inline-block; width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .s-built { background: #22c55e; }
+  .s-partial { background: #eab308; }
+  .s-missing { background: #ef4444; }
+  .s-conceptual { background: #8b5cf6; }
+
+  /* Agents section */
+  .agents-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .agent-group h4 { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .agent { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 4px 0; }
+  .agent-type { font-size: 9px; padding: 1px 5px; border-radius: 3px; font-weight: 600; }
+  .at-human { background: #1e3a5f; color: #60a5fa; }
+  .at-ai { background: #3b1f5e; color: #c084fc; }
+  .at-hybrid { background: #3b3510; color: #fbbf24; }
+
+  /* Flow arrows between layers */
+  .flow-arrow { text-align: center; color: #333; font-size: 20px; margin: -6px 0; }
+
+  /* Repos section */
+  .repos { margin-top: 28px; border: 1px solid #222; border-radius: 10px; padding: 20px; }
+  .repos h3 { color: #fff; font-size: 15px; margin-bottom: 14px; }
+  .repo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .repo-card { padding: 14px; border-radius: 6px; border: 1px solid #2a2a2a; background: #0d0d14; }
+  .repo-card h4 { color: #fff; font-size: 13px; margin-bottom: 4px; }
+  .repo-card .desc { color: #777; font-size: 11px; margin-bottom: 8px; }
+  .repo-card .stats { font-size: 10px; color: #555; }
+  .progress-bar { height: 4px; background: #1a1a24; border-radius: 2px; margin-top: 6px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 2px; }
+
+  /* Domains */
+  .domains { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .domain-tag { font-size: 10px; padding: 2px 8px; border-radius: 3px; font-weight: 600; }
+  .d-ai { background: #0e3a4a; color: #22d3ee; }
+  .d-cyber { background: #0a3a1a; color: #4ade80; }
+  .d-innovation { background: #3a3500; color: #facc15; }
+  .d-fnw { background: #2d1050; color: #c084fc; }
+  .d-space { background: #3a2000; color: #fb923c; }
+  .d-digital { background: #0a3030; color: #2dd4bf; }
+  .d-sports { background: #3a0a0a; color: #f87171; }
+  .d-ops { background: #1a1a2e; color: #94a3b8; }
+
+  .section-divider { border: none; border-top: 1px solid #1a1a24; margin: 28px 0; }
+
+  .gap-summary { margin-top: 28px; border: 1px solid #3b1111; border-radius: 10px; padding: 20px; background: rgba(239,68,68,0.03); }
+  .gap-summary h3 { color: #ef4444; font-size: 15px; margin-bottom: 14px; }
+  .gap-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .gap-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; padding: 8px 12px; border-radius: 4px; background: #110808; border: 1px solid #2a1111; }
+  .gap-item .gap-id { color: #ef4444; font-weight: 700; font-family: monospace; font-size: 11px; white-space: nowrap; }
+  .gap-item .gap-text { color: #ccc; }
+  .gap-item .gap-layer { font-size: 9px; color: #666; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<h1>NON SEQUITUR — System Architecture Map</h1>
+<p class="subtitle">As-built + envisioned state | Produced for architecture review — March 2026</p>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot dot-built"></div> Built & Live</div>
+  <div class="legend-item"><div class="legend-dot dot-partial"></div> Partial / In Progress</div>
+  <div class="legend-item"><div class="legend-dot dot-missing"></div> Missing / Not Started</div>
+  <div class="legend-item"><div class="legend-dot dot-conceptual"></div> Conceptual / Needs Definition</div>
+</div>
+
+<div class="layout">
+  <!-- LEFT: Company Stack -->
+  <div>
+    <div class="company-stack">
+      <div class="stack-tier tier-ns">
+        <h3>Non Sequitur</h3>
+        <p>Brand & Experience Layer</p>
+        <p style="margin-top:6px; font-size:10px; color:#f59e0b;">justin-kuiper.com</p>
+      </div>
+      <div class="stack-tier tier-ag">
+        <h3>Agentics</h3>
+        <p>Technology Stack & Operating Model</p>
+        <p style="margin-top:6px; font-size:10px; color:#8b5cf6;">Human + AI collaborative production</p>
+      </div>
+      <div class="stack-tier tier-a3">
+        <h3>ag3ntics</h3>
+        <p>System Identity & Domain</p>
+        <p style="margin-top:6px; font-size:10px; color:#06b6d4;">ag3ntics.ai / ag3ntics.dev</p>
+      </div>
+      <div class="stack-tier tier-yks">
+        <h3>Yeti Knowledge Systems</h3>
+        <p>Platform & Infrastructure</p>
+        <p style="margin-top:6px; font-size:10px; color:#22c55e;">AWS + K3s + GitHub</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 28px;">
+      <h4 style="color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Content Domains (7)</h4>
+      <div class="domains" style="flex-direction: column;">
+        <span class="domain-tag d-ai">AI & ML — 7 feeds ✓</span>
+        <span class="domain-tag d-cyber">CYBER — 7 feeds ✓</span>
+        <span class="domain-tag d-innovation">INNOVATION — 11 feeds ✓</span>
+        <span class="domain-tag d-fnw">FNW / FAITH — 11 feeds ✓</span>
+        <span class="domain-tag d-space">SPACE / AERO — 6 feeds ✓</span>
+        <span class="domain-tag d-digital">DIGITAL LIFE — 6 feeds ✓</span>
+        <span class="domain-tag d-sports" style="opacity:0.4;">SPORTS ANALYTICS — 0 feeds ✗</span>
+        <span class="domain-tag d-ops" style="opacity:0.4;">OPERATIONAL LIFE — undefined ✗</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: System Layers -->
+  <div class="system-layers">
+
+    <!-- SIGNAL LAYER -->
+    <div class="layer layer-signal">
+      <div class="layer-header">
+        <span class="layer-label">Layer 1</span>
+        <span class="layer-title">Signal — Ingestion & Capture</span>
+      </div>
+      <div class="components">
+        <div class="component">
+          <div class="name"><span class="status s-built"></span> RSS Sensor Array</div>
+          <div class="detail">48 feeds across 6 domains via WP RSS Aggregator Pro. Auto-ingesting daily.</div>
+          <div class="repo">the-markdown / G2-M02</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-built"></span> Claude AI Scoring</div>
+          <div class="detail">3-dimension scoring (relevance, arc, domain_fit) with weighted multipliers. claude-sonnet-4-6.</div>
+          <div class="repo">the-markdown / G2-M07b2 + G2-M07b5</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-built"></span> Hero Image Pipeline</div>
+          <div class="detail">og:image scraping with fallback chain. REST endpoint for batch processing.</div>
+          <div class="repo">the-markdown / S124</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> Signal Schema</div>
+          <div class="detail">No formal schema. Signals are WP posts with ad-hoc meta fields. RFI-005.</div>
+          <div class="repo">—</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> Intent Classification</div>
+          <div class="detail">Every signal should carry intent tags (narrative_craft, innovation, etc.). RFI-003.</div>
+          <div class="repo">—</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> Sports Analytics Ingestion</div>
+          <div class="detail">No feeds, no data sources, no scoring model. RFI-004.</div>
+          <div class="repo">—</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> Manual Signal Input</div>
+          <div class="detail">Human-submitted signals (non-RSS). No UI or API exists.</div>
+          <div class="repo">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-arrow">▼</div>
+
+    <!-- MEANING LAYER -->
+    <div class="layer layer-meaning">
+      <div class="layer-header">
+        <span class="layer-label">Layer 2</span>
+        <span class="layer-title">Meaning — Interpretation & Pattern Extraction</span>
+      </div>
+      <div class="components">
+        <div class="component">
+          <div class="name"><span class="status s-partial"></span> Domain Classification</div>
+          <div class="detail">Implicit via RSS feed tags. Not intelligent — no reclassification, no multi-domain signals.</div>
+          <div class="repo">the-markdown / G2-M02 (feed tags)</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-partial"></span> Domain Weighting</div>
+          <div class="detail">Hardcoded multipliers in prompt text (IR 1.5x, EV 1.3x, etc.). No engine. RFI-002.</div>
+          <div class="repo">the-markdown / G2-M07b5</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> Pattern Agent</div>
+          <div class="detail">Extract hook type, structure, emotional arc, visual technique, authenticity. Not built.</div>
+          <div class="repo">—</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> Pattern Library</div>
+          <div class="detail">Reusable pattern database linked to signals and outputs. Does not exist.</div>
+          <div class="repo">—</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> Intent Agent</div>
+          <div class="detail">Domain + intent classification agent. Not implemented.</div>
+          <div class="repo">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-arrow">▼</div>
+
+    <!-- OUTPUT LAYER -->
+    <div class="layer layer-output">
+      <div class="layer-header">
+        <span class="layer-label">Layer 3</span>
+        <span class="layer-title">Output — Content Construction & Distribution</span>
+      </div>
+      <div class="components">
+        <div class="component">
+          <div class="name"><span class="status s-built"></span> Editorial Board</div>
+          <div class="detail">6 boxes, 19 slots. Queue/reject/skip workflow. Admin UI live in WP.</div>
+          <div class="repo">the-markdown / S128</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-built"></span> Daily Briefing Page</div>
+          <div class="detail">Public page at /the-markdown/ with 6 domain blocks. Live and auto-refreshing.</div>
+          <div class="repo">the-markdown / S122</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-built"></span> Email Digest</div>
+          <div class="detail">Morning digest via wp_mail with box labels per domain.</div>
+          <div class="repo">the-markdown / G2-M08</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-built"></span> Yeti's Take / X Embeds</div>
+          <div class="detail">Commentary cards with X post integration. oEmbed API with 24h cache.</div>
+          <div class="repo">the-markdown / S138</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-partial"></span> Social Distribution</div>
+          <div class="detail">Share buttons for X, LinkedIn, Instagram exist. No automated publishing agent.</div>
+          <div class="repo">the-markdown / S128 (buttons only)</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> Content Lab</div>
+          <div class="detail">Full orchestration workspace: signal queue, drafting workbench, iteration, publishing. RFI-001.</div>
+          <div class="repo">—</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> Content Agent (AI Drafts)</div>
+          <div class="detail">AI draft generation for articles, social posts, newsletters. Not implemented.</div>
+          <div class="repo">—</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> Distribution Agent</div>
+          <div class="detail">Automated multi-channel publishing (X, LinkedIn, YouTube, Medium). Not built.</div>
+          <div class="repo">—</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> Book Pipeline</div>
+          <div class="detail">Long-form content pipeline. RFI-009. Not started.</div>
+          <div class="repo">—</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> Feedback Agent</div>
+          <div class="detail">Extract signals from engagement (X replies, analytics). Feed back into signal layer.</div>
+          <div class="repo">—</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> Archive Page</div>
+          <div class="detail">/the-markdown-archive/ returns 404. Not implemented.</div>
+          <div class="repo">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-arrow">▼</div>
+
+    <!-- CAPABILITY LAYER -->
+    <div class="layer layer-capability">
+      <div class="layer-header">
+        <span class="layer-label">Layer 4</span>
+        <span class="layer-title">Capability — Infrastructure & Reusable Systems</span>
+      </div>
+      <div class="components">
+        <div class="component">
+          <div class="name"><span class="status s-built"></span> AWS Infrastructure</div>
+          <div class="detail">VPC, EC2 t3.xlarge, IAM, security groups, Elastic IP. Terraform deployed.</div>
+          <div class="repo">robo-stack / terraform/</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-built"></span> CI/CD Pipelines</div>
+          <div class="detail">8 GH Actions workflows: CodeQL, Trivy, gitleaks, deploy. HF03 hotfix deploy pipeline.</div>
+          <div class="repo">robo-stack + the-markdown / .github/</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-built"></span> WordPress CMS</div>
+          <div class="detail">Code Snippets Pro, WP RSS Aggregator Pro. 8 snippets deployed via REST API.</div>
+          <div class="repo">the-markdown (snippets)</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-partial"></span> K3s Cluster</div>
+          <div class="detail">64 manifests committed. NONE applied. No container images in GHCR. 5 secrets missing.</div>
+          <div class="repo">robo-stack / k8s/</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> Monitoring Stack</div>
+          <div class="detail">Prometheus, Grafana, Loki, Promtail — YAML exists, not deployed.</div>
+          <div class="repo">robo-stack / k8s/monitoring/</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> API Abstraction Layer</div>
+          <div class="detail">No unified API. Everything is WP snippets + wp_options. RFI-008.</div>
+          <div class="repo">—</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> Traceability System</div>
+          <div class="detail">Signal → Output lineage tracking. Partial at best. RFI-006.</div>
+          <div class="repo">—</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> System Dashboard</div>
+          <div class="detail">Operational visibility into pipeline health, scores, throughput. RFI-010.</div>
+          <div class="repo">—</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-missing"></span> Security Hardening</div>
+          <div class="detail">7 open security tasks (pen test, incident response, OPSEC). 33 MITRE items unmitigated.</div>
+          <div class="repo">robo-stack / k8s/hardening/ + the-markdown</div>
+        </div>
+        <div class="component">
+          <div class="name"><span class="status s-conceptual"></span> Content Ops Platform</div>
+          <div class="detail">1 commit. Sprint 0. Blocked. Pipeline defined but nothing built.</div>
+          <div class="repo">content-ops</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- AGENT MODEL -->
+<div style="margin-top: 8px;">
+  <h3 style="color: #fff; font-size: 16px; margin-bottom: 16px;">Agent Roster — Agentics Operating Model</h3>
+  <div class="agents-row">
+    <div class="agent-group">
+      <h4>Human Agents</h4>
+      <div class="agent"><span class="status s-built"></span><span class="agent-type at-human">HUMAN</span> Founder Agent (Justin)</div>
+      <div class="agent"><span class="status s-conceptual"></span><span class="agent-type at-human">HUMAN</span> Architect Agent</div>
+      <div class="agent"><span class="status s-built"></span><span class="agent-type at-human">HUMAN</span> Editorial Agent</div>
+      <div class="agent"><span class="status s-partial"></span><span class="agent-type at-human">HUMAN</span> Creative Agent</div>
+    </div>
+    <div class="agent-group">
+      <h4>AI Agents</h4>
+      <div class="agent"><span class="status s-built"></span><span class="agent-type at-ai">AI</span> Signal Agent (RSS + Scoring)</div>
+      <div class="agent"><span class="status s-missing"></span><span class="agent-type at-ai">AI</span> Intent Agent</div>
+      <div class="agent"><span class="status s-missing"></span><span class="agent-type at-ai">AI</span> Pattern Agent</div>
+      <div class="agent"><span class="status s-missing"></span><span class="agent-type at-ai">AI</span> Content Agent</div>
+      <div class="agent"><span class="status s-missing"></span><span class="agent-type at-ai">AI</span> Distribution Agent</div>
+      <div class="agent"><span class="status s-missing"></span><span class="agent-type at-ai">AI</span> Feedback Agent</div>
+    </div>
+    <div class="agent-group">
+      <h4>Hybrid Agents</h4>
+      <div class="agent"><span class="status s-missing"></span><span class="agent-type at-hybrid">HYBRID</span> Content Strategist</div>
+      <div class="agent"><span class="status s-missing"></span><span class="agent-type at-hybrid">HYBRID</span> Workflow Orchestrator</div>
+      <div class="agent"><span class="status s-conceptual"></span><span class="agent-type at-hybrid">HYBRID</span> System Agent</div>
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- REPOS -->
+<div class="repos">
+  <h3>Repository Map</h3>
+  <div class="repo-grid">
+    <div class="repo-card">
+      <h4>the-markdown</h4>
+      <div class="desc">WordPress snippets, editorial UI, scoring pipeline, CI/CD. The working product.</div>
+      <div class="stats">PHP + HTML | 87% complete (108/124) | 4 branches | HF03/HF04 active</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:87%; background: #22c55e;"></div></div>
+    </div>
+    <div class="repo-card">
+      <h4>robo-stack</h4>
+      <div class="desc">AWS infra (Terraform), K8s manifests (not applied), monitoring (not deployed), security.</div>
+      <div class="stats">Shell + HCL + Python | Sprint 4 done | 34 open issues (mostly SEC-T*)</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:45%; background: #eab308;"></div></div>
+    </div>
+    <div class="repo-card">
+      <h4>content-ops</h4>
+      <div class="desc">Content Refinery Platform. Landing page only. Sprint 0. Blocked on robo-stack.</div>
+      <div class="stats">HTML | 1 commit | 3 open issues | Sprint 0 complete</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:5%; background: #ef4444;"></div></div>
+    </div>
+    <div class="repo-card" style="border-color: #333; border-style: dashed;">
+      <h4 style="color: #888;">the-foremans-build-stack <span style="color:#ef4444; font-size:10px;">NEW</span></h4>
+      <div class="desc">Architecture docs, gap analysis, design artifacts. Sandbox + control plane for itself.</div>
+      <div class="stats">To be created</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:0%; background: #ef4444;"></div></div>
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- GAP SUMMARY -->
+<div class="gap-summary">
+  <h3>Complete Gap Register — 22 Items</h3>
+  <div class="gap-list">
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-01</span></div>
+      <div><div class="gap-text">Signal Schema — no formal data model for signals</div><div class="gap-layer">Signal Layer · RFI-005</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-02</span></div>
+      <div><div class="gap-text">Intent Layer — no classification system for signal intent</div><div class="gap-layer">Signal Layer · RFI-003</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-03</span></div>
+      <div><div class="gap-text">Sports Analytics — no feeds, data sources, or scoring</div><div class="gap-layer">Signal Layer · RFI-004</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-04</span></div>
+      <div><div class="gap-text">Manual Signal Input — no UI for human-submitted signals</div><div class="gap-layer">Signal Layer</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-05</span></div>
+      <div><div class="gap-text">Domain Weighting Engine — hardcoded in prompt, not configurable</div><div class="gap-layer">Meaning Layer · RFI-002</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-06</span></div>
+      <div><div class="gap-text">Pattern Agent — no narrative/analytical pattern extraction</div><div class="gap-layer">Meaning Layer</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-07</span></div>
+      <div><div class="gap-text">Pattern Library — no reusable pattern database</div><div class="gap-layer">Meaning Layer</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-08</span></div>
+      <div><div class="gap-text">Intent Agent — no domain + intent classification agent</div><div class="gap-layer">Meaning Layer</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-09</span></div>
+      <div><div class="gap-text">Content Lab — no orchestration workspace for drafting/iteration</div><div class="gap-layer">Output Layer · RFI-001</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-10</span></div>
+      <div><div class="gap-text">Content Agent — no AI draft generation</div><div class="gap-layer">Output Layer</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-11</span></div>
+      <div><div class="gap-text">Distribution Agent — no automated multi-channel publishing</div><div class="gap-layer">Output Layer</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-12</span></div>
+      <div><div class="gap-text">Feedback Agent — no engagement signal extraction loop</div><div class="gap-layer">Output Layer</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-13</span></div>
+      <div><div class="gap-text">Book Pipeline — no long-form content workflow</div><div class="gap-layer">Output Layer · RFI-009</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-14</span></div>
+      <div><div class="gap-text">Archive Page — /the-markdown-archive/ returns 404</div><div class="gap-layer">Output Layer</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-15</span></div>
+      <div><div class="gap-text">API Abstraction — no unified API; all wp_options + snippets</div><div class="gap-layer">Capability Layer · RFI-008</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-16</span></div>
+      <div><div class="gap-text">K8s Manifests — 64 files committed, none applied to cluster</div><div class="gap-layer">Capability Layer · ROBO GAP-01</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-17</span></div>
+      <div><div class="gap-text">Container Images — no images built or pushed to GHCR</div><div class="gap-layer">Capability Layer · ROBO GAP-03/04</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-18</span></div>
+      <div><div class="gap-text">GitHub Secrets — 5 critical secrets not configured</div><div class="gap-layer">Capability Layer · ROBO GAP-02/04/05</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-19</span></div>
+      <div><div class="gap-text">Monitoring — Prometheus/Grafana/Loki YAML only, not running</div><div class="gap-layer">Capability Layer</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-20</span></div>
+      <div><div class="gap-text">Traceability — no Signal → Output lineage tracking</div><div class="gap-layer">Capability Layer · RFI-006</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-21</span></div>
+      <div><div class="gap-text">System Dashboard — no operational visibility</div><div class="gap-layer">Capability Layer · RFI-010</div></div>
+    </div>
+    <div class="gap-item">
+      <div><span class="gap-id">GAP-22</span></div>
+      <div><div class="gap-text">Security — 7 open tasks + 33 MITRE items unmitigated</div><div class="gap-layer">Capability Layer</div></div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 32px; padding: 16px; border: 1px solid #222; border-radius: 8px; background: #0d0d14;">
+  <p style="font-size: 12px; color: #666;">
+    <strong style="color:#888;">Source documents:</strong> non_sequitur_rev3_unified.pdf · non_sequitur_handover.pdf · non_sequitur_agentics_org_rev2.pdf<br>
+    <strong style="color:#888;">Repos audited:</strong> LittleYeti-Dev/the-markdown · LittleYeti-Dev/content-ops · LittleYeti-Dev/robo-stack<br>
+    <strong style="color:#888;">Live sites checked:</strong> justin-kuiper.com/the-markdown/ · justin-kuiper.com · justin-kuiper.com/the-markdown-archive/ (404)<br>
+    <strong style="color:#888;">Generated:</strong> March 20, 2026 — Architect Review
+  </p>
+</div>
+
+</body>
+</html>

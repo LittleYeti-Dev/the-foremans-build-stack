@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentics — System Architecture v2</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 32px; min-height: 100vh; }
+
+  h1 { color: #fff; font-size: 26px; margin-bottom: 4px; letter-spacing: -0.5px; }
+  .subtitle { color: #888; font-size: 13px; margin-bottom: 32px; }
+  .section-title { color: #fff; font-size: 17px; font-weight: 600; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #1a1a24; }
+  .section-subtitle { color: #666; font-size: 11px; font-weight: 400; margin-left: 8px; }
+
+  .legend { display: flex; gap: 20px; margin-bottom: 28px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #aaa; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+  .dot-built { background: #22c55e; }
+  .dot-partial { background: #eab308; }
+  .dot-missing { background: #ef4444; }
+  .dot-conceptual { background: #8b5cf6; }
+
+  .status { display: inline-block; width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .s-built { background: #22c55e; }
+  .s-partial { background: #eab308; }
+  .s-missing { background: #ef4444; }
+  .s-conceptual { background: #8b5cf6; }
+
+  .divider { border: none; border-top: 1px solid #1a1a24; margin: 32px 0; }
+
+  /* ===== TIER 1: THE AGENTICS FRAMEWORK ===== */
+  .framework-box { border: 2px solid #8b5cf6; border-radius: 12px; padding: 24px; background: rgba(139,92,246,0.03); margin-bottom: 24px; }
+  .framework-box .tag { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; padding: 3px 10px; border-radius: 4px; background: #3b0764; color: #c084fc; margin-bottom: 12px; }
+  .framework-principle { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .principle { padding: 12px 16px; border-radius: 6px; background: #111118; border: 1px solid #2a2a2a; }
+  .principle h4 { color: #c084fc; font-size: 12px; margin-bottom: 4px; }
+  .principle p { color: #888; font-size: 11px; line-height: 1.4; }
+
+  /* ===== TIER 2: THE ORCHESTRATOR ===== */
+  .orchestrator { display: flex; align-items: center; gap: 20px; padding: 20px; border: 2px solid #f59e0b; border-radius: 12px; background: rgba(245,158,11,0.04); margin-bottom: 24px; }
+  .orch-avatar { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: #0a0a0f; flex-shrink: 0; }
+  .orch-info h3 { color: #f59e0b; font-size: 16px; margin-bottom: 2px; }
+  .orch-info p { color: #888; font-size: 12px; line-height: 1.5; }
+  .orch-roles { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .orch-role { font-size: 10px; padding: 2px 8px; border-radius: 3px; background: #422006; color: #fbbf24; font-weight: 600; }
+
+  /* ===== TIER 3: AI AGENT INSTANCES ===== */
+  .agent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .agent-card { padding: 16px; border-radius: 8px; border: 1px solid #2a2a2a; background: #0d0d14; position: relative; }
+  .agent-card.active { border-color: #22c55e; }
+  .agent-card.planned { border-color: #333; border-style: dashed; opacity: 0.7; }
+  .agent-card .platform { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 2px 6px; border-radius: 3px; display: inline-block; margin-bottom: 8px; }
+  .plat-claude { background: #1a1030; color: #c084fc; }
+  .plat-chatgpt { background: #0a2a1a; color: #4ade80; }
+  .plat-windsurf { background: #0a1a3a; color: #60a5fa; }
+  .plat-tbd { background: #1a1a1a; color: #666; }
+  .agent-card h4 { color: #fff; font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .agent-card .role { color: #aaa; font-size: 11px; margin-bottom: 6px; }
+  .agent-card .context { color: #555; font-size: 10px; line-height: 1.4; }
+  .agent-card .repos-list { margin-top: 8px; font-size: 10px; color: #444; font-family: monospace; }
+
+  .flow-connector { text-align: center; color: #333; font-size: 14px; margin: -4px 0 8px 0; letter-spacing: 2px; }
+
+  /* ===== TIER 4: COORDINATION LAYER ===== */
+  .coord-layer { border: 1px solid #164e63; border-radius: 12px; padding: 20px; background: rgba(6,182,212,0.03); margin-bottom: 24px; }
+  .coord-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .coord-item { padding: 12px; border-radius: 6px; background: #111118; border: 1px solid #1a2a30; }
+  .coord-item h4 { color: #22d3ee; font-size: 12px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .coord-item p { color: #666; font-size: 10px; line-height: 1.4; }
+
+  /* ===== TIER 5: PRODUCTS ===== */
+  .products-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .product-card { padding: 16px; border-radius: 8px; border: 1px solid #2a2a2a; background: #0d0d14; }
+  .product-card.primary { border-color: #f59e0b; }
+  .product-card h4 { color: #fff; font-size: 14px; margin-bottom: 4px; }
+  .product-card .desc { color: #777; font-size: 11px; margin-bottom: 10px; }
+  .product-pipeline { display: flex; gap: 4px; flex-wrap: wrap; }
+  .pipe-stage { font-size: 9px; padding: 3px 8px; border-radius: 3px; font-weight: 600; }
+  .ps-built { background: #052e16; color: #4ade80; }
+  .ps-partial { background: #422006; color: #fbbf24; }
+  .ps-missing { background: #2a1111; color: #f87171; }
+
+  /* ===== TIER 6: INFRASTRUCTURE ===== */
+  .infra-box { border: 1px solid #052e16; border-radius: 12px; padding: 20px; background: rgba(34,197,94,0.03); }
+  .infra-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .infra-item { padding: 10px 14px; border-radius: 6px; background: #111118; border: 1px solid #1a2a1a; font-size: 12px; }
+  .infra-item .name { color: #fff; font-weight: 600; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+  .infra-item .detail { color: #666; font-size: 10px; }
+
+  /* ===== GAP REGISTER ===== */
+  .gap-register { border: 1px solid #3b1111; border-radius: 12px; padding: 20px; background: rgba(239,68,68,0.02); }
+  .gap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .gap-row { display: flex; align-items: flex-start; gap: 8px; font-size: 11px; padding: 6px 10px; border-radius: 4px; background: #110808; border: 1px solid #1a0808; }
+  .gap-id { color: #ef4444; font-weight: 700; font-family: monospace; white-space: nowrap; min-width: 52px; }
+  .gap-text { color: #ccc; }
+  .gap-tier { color: #555; font-size: 9px; }
+
+  .tier-label { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 12px; }
+  .tier-num { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<h1>AGENTICS — Distributed AI Workforce Architecture</h1>
+<p class="subtitle">v2 — Corrected model. Agentics = reusable framework for multi-AI project execution. | March 2026</p>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot dot-built"></div> Built & Active</div>
+  <div class="legend-item"><div class="legend-dot dot-partial"></div> Partial / In Progress</div>
+  <div class="legend-item"><div class="legend-dot dot-missing"></div> Not Started</div>
+  <div class="legend-item"><div class="legend-dot dot-conceptual"></div> Needs Definition</div>
+</div>
+
+<!-- ===== TIER 1: THE AGENTICS FRAMEWORK ===== -->
+<div class="framework-box">
+  <span class="tag">Tier 1 — The Framework</span>
+  <h2 style="color: #c084fc; font-size: 18px; margin-bottom: 4px;">Agentics <span style="color: #555; font-size: 13px; font-weight: 400;">/ ag3ntics</span></h2>
+  <p style="color: #888; font-size: 12px; margin-bottom: 14px;">A reusable framework for distributing project work across multiple AI instances, each with a dedicated role and isolated context boundary. Product-agnostic. Human-orchestrated.</p>
+  <div class="framework-principle">
+    <div class="principle">
+      <h4>Human = Direction</h4>
+      <p>Meaning, judgment, intent, final approval. The orchestrator routes work, defines domains, makes calls the AI can't.</p>
+    </div>
+    <div class="principle">
+      <h4>AI = Execution</h4>
+      <p>Each AI instance has a bounded role, a dedicated context window, and a training trajectory that keeps it focused.</p>
+    </div>
+    <div class="principle">
+      <h4>System = Flow</h4>
+      <p>GitHub repos, project boards, and wikis are the coordination fabric. Handoffs between agents happen through commits, issues, and docs.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TIER 2: THE ORCHESTRATOR ===== -->
+<div class="tier-label"><span class="tier-num" style="background:#422006;color:#fbbf24;">2</span> <span style="color:#f59e0b;">The Orchestrator</span></div>
+<div class="orchestrator">
+  <div class="orch-avatar">JK</div>
+  <div class="orch-info">
+    <h3>Justin Kuiper — Founder Agent</h3>
+    <p>Central orchestrator across all AI agent instances. Routes work between bounded AI contexts. Defines domains, intent, narrative direction. Makes judgment calls. Holds the unified vision that no single AI instance can see in full.</p>
+    <div class="orch-roles">
+      <span class="orch-role">Work Routing</span>
+      <span class="orch-role">Context Bridging</span>
+      <span class="orch-role">Final Judgment</span>
+      <span class="orch-role">Domain Definition</span>
+      <span class="orch-role">Training Direction</span>
+    </div>
+  </div>
+</div>
+
+<div class="flow-connector">↓ routes work to ↓</div>
+
+<!-- ===== TIER 3: AI AGENT INSTANCES ===== -->
+<div class="tier-label"><span class="tier-num" style="background:#3b0764;color:#c084fc;">3</span> <span style="color:#c084fc;">AI Agent Instances</span> <span class="section-subtitle">Each is a separate AI account/session with isolated context</span></div>
+
+<div class="agent-grid">
+  <div class="agent-card active">
+    <span class="platform plat-claude">Claude · Account A</span>
+    <h4><span class="status s-built"></span> The Architect</h4>
+    <div class="role">System design, architecture, data models, API specs, gap analysis</div>
+    <div class="context">Dedicated context: reads all three repos, wikis, project boards. Translates vision into technical architecture. This session.</div>
+    <div class="repos-list">→ the-foremans-build-stack, robo-stack, content-ops</div>
+  </div>
+
+  <div class="agent-card active">
+    <span class="platform plat-claude">Claude · Account B</span>
+    <h4><span class="status s-built"></span> The Builder (The Markdown)</h4>
+    <div class="role">WordPress development, PHP snippets, editorial UI, scoring pipeline</div>
+    <div class="context">Dedicated context: WordPress Code Snippets, RSS Aggregator, Claude API integration. Built 87% of The Markdown.</div>
+    <div class="repos-list">→ the-markdown</div>
+  </div>
+
+  <div class="agent-card active">
+    <span class="platform plat-claude">Claude · Cowork</span>
+    <h4><span class="status s-built"></span> The Reviewer</h4>
+    <div class="role">Code review, document review, cross-repo analysis, brainstorming</div>
+    <div class="context">General-purpose context for review tasks, document creation, and strategic thinking. Current conversation.</div>
+    <div class="repos-list">→ all repos (read access)</div>
+  </div>
+
+  <div class="agent-card planned">
+    <span class="platform plat-chatgpt">ChatGPT · Instance</span>
+    <h4><span class="status s-conceptual"></span> TBD Role</h4>
+    <div class="role">Separate model for different perspective / capability</div>
+    <div class="context">Different model architecture = different strengths. Context boundary prevents cross-contamination with Claude instances.</div>
+    <div class="repos-list">→ TBD</div>
+  </div>
+
+  <div class="agent-card planned">
+    <span class="platform plat-windsurf">Windsurf · Instance</span>
+    <h4><span class="status s-conceptual"></span> TBD Role</h4>
+    <div class="role">Specialized coding / IDE-integrated development</div>
+    <div class="context">IDE-native AI agent with different interaction model. Strong for rapid code generation in-editor.</div>
+    <div class="repos-list">→ TBD</div>
+  </div>
+
+  <div class="agent-card planned">
+    <span class="platform plat-tbd">Platform TBD</span>
+    <h4><span class="status s-conceptual"></span> Additional Instances</h4>
+    <div class="role">Framework supports N agents across any AI platform</div>
+    <div class="context">Add new agents as needed. Each gets a bounded role, a platform, and repo access. The pattern is reusable.</div>
+    <div class="repos-list">→ as assigned</div>
+  </div>
+</div>
+
+<div class="flow-connector">↓ produce artifacts into ↓</div>
+
+<!-- ===== TIER 4: COORDINATION LAYER ===== -->
+<div class="tier-label"><span class="tier-num" style="background:#164e63;color:#22d3ee;">4</span> <span style="color:#22d3ee;">Coordination Layer</span> <span class="section-subtitle">GitHub as the handoff fabric between agents</span></div>
+
+<div class="coord-layer">
+  <div class="coord-grid">
+    <div class="coord-item">
+      <h4><span class="status s-built"></span> Git Repos</h4>
+      <p>Code, configs, docs. Each agent commits to its assigned repos. Branches isolate work. PRs are the handoff mechanism.</p>
+    </div>
+    <div class="coord-item">
+      <h4><span class="status s-built"></span> GitHub Issues</h4>
+      <p>Work items, bug reports, RFIs. Agents pick up issues, work them, close them. Justin creates and prioritizes.</p>
+    </div>
+    <div class="coord-item">
+      <h4><span class="status s-built"></span> Project Boards</h4>
+      <p>3 boards (Robo Stack, Content Ops, YKS Master). Kanban view of all work across agents.</p>
+    </div>
+    <div class="coord-item">
+      <h4><span class="status s-built"></span> Wikis</h4>
+      <p>Architecture docs, sprint plans, agent prompts, retrospectives. The institutional memory across sessions.</p>
+    </div>
+    <div class="coord-item">
+      <h4><span class="status s-partial"></span> CI/CD Pipelines</h4>
+      <p>GitHub Actions for deploy + security scanning. Live for the-markdown (HF03). Robo-stack has 8 workflows.</p>
+    </div>
+    <div class="coord-item">
+      <h4><span class="status s-missing"></span> Agent Handoff Protocol</h4>
+      <p>No formal protocol for how one agent's output becomes another's input. Currently ad-hoc via Justin bridging context.</p>
+    </div>
+    <div class="coord-item">
+      <h4><span class="status s-missing"></span> Context Packages</h4>
+      <p>No standardized way to bootstrap a new agent session with the right context. Boot prompts exist in wiki but are manual.</p>
+    </div>
+    <div class="coord-item">
+      <h4><span class="status s-missing"></span> Cross-Agent Traceability</h4>
+      <p>No way to track which agent produced what, when. No audit trail of decisions across sessions.</p>
+    </div>
+  </div>
+</div>
+
+<div class="flow-connector">↓ deploy to ↓</div>
+
+<!-- ===== TIER 5: PRODUCTS ===== -->
+<div class="tier-label"><span class="tier-num" style="background:#422006;color:#fbbf24;">5</span> <span style="color:#fbbf24;">Products</span> <span class="section-subtitle">What the distributed AI workforce produces</span></div>
+
+<div class="products-grid">
+  <div class="product-card primary">
+    <h4>The Markdown — Non Sequitur Content Platform</h4>
+    <div class="desc">AI-assisted content curation and publishing. 48 RSS feeds → Claude scoring → editorial approval → daily briefing + email digest + social. Running on WordPress at justin-kuiper.com. 87% complete.</div>
+    <div style="margin-bottom: 8px; font-size: 11px; color: #666;">Product Pipeline (Signal → Meaning → Output):</div>
+    <div class="product-pipeline">
+      <span class="pipe-stage ps-built">RSS Ingest ✓</span>
+      <span class="pipe-stage ps-built">AI Scoring ✓</span>
+      <span class="pipe-stage ps-built">Hero Images ✓</span>
+      <span class="pipe-stage ps-partial">Domain Class. ~</span>
+      <span class="pipe-stage ps-missing">Intent Tags ✗</span>
+      <span class="pipe-stage ps-missing">Patterns ✗</span>
+      <span class="pipe-stage ps-built">Editorial Board ✓</span>
+      <span class="pipe-stage ps-built">Daily Page ✓</span>
+      <span class="pipe-stage ps-built">Email Digest ✓</span>
+      <span class="pipe-stage ps-built">X Embeds ✓</span>
+      <span class="pipe-stage ps-partial">Social Share ~</span>
+      <span class="pipe-stage ps-missing">Content Lab ✗</span>
+      <span class="pipe-stage ps-missing">AI Drafts ✗</span>
+      <span class="pipe-stage ps-missing">Auto-Publish ✗</span>
+      <span class="pipe-stage ps-missing">Feedback Loop ✗</span>
+      <span class="pipe-stage ps-missing">Archive ✗</span>
+    </div>
+  </div>
+  <div class="product-card" style="border-style: dashed;">
+    <h4 style="color: #888;">Future Products</h4>
+    <div class="desc" style="color: #555;">The Agentics framework is product-agnostic. Any project that follows the Signal → Meaning → Output pattern can plug into the same multi-agent workflow. Different domains, different feeds, same infrastructure.</div>
+    <div style="margin-top: 12px; font-size: 10px; color: #444;">
+      Candidates mentioned in docs:<br>
+      • Book Pipeline (RFI-009)<br>
+      • Sports Analytics product<br>
+      • Client deployments ("Gentex Agentics")
+    </div>
+  </div>
+</div>
+
+<div class="flow-connector">↓ hosted on ↓</div>
+
+<!-- ===== TIER 6: INFRASTRUCTURE ===== -->
+<div class="tier-label"><span class="tier-num" style="background:#052e16;color:#4ade80;">6</span> <span style="color:#4ade80;">Infrastructure — Yeti Knowledge Systems (YKS)</span></div>
+
+<div class="infra-box">
+  <div class="infra-grid">
+    <div class="infra-item">
+      <div class="name"><span class="status s-built"></span> AWS (Terraform)</div>
+      <div class="detail">VPC, EC2 t3.xlarge, IAM, SGs, EIP. Deployed.</div>
+    </div>
+    <div class="infra-item">
+      <div class="name"><span class="status s-partial"></span> K3s Cluster</div>
+      <div class="detail">64 manifests, none applied. 5 secrets missing.</div>
+    </div>
+    <div class="infra-item">
+      <div class="name"><span class="status s-built"></span> WordPress CMS</div>
+      <div class="detail">justin-kuiper.com. 8 snippets. RSS Aggregator Pro.</div>
+    </div>
+    <div class="infra-item">
+      <div class="name"><span class="status s-built"></span> GitHub (4 repos)</div>
+      <div class="detail">the-markdown, robo-stack, content-ops, + foremans (new)</div>
+    </div>
+    <div class="infra-item">
+      <div class="name"><span class="status s-built"></span> CI/CD (GH Actions)</div>
+      <div class="detail">CodeQL, Trivy, gitleaks, deploy pipelines.</div>
+    </div>
+    <div class="infra-item">
+      <div class="name"><span class="status s-missing"></span> Monitoring</div>
+      <div class="detail">Prometheus/Grafana/Loki — YAML only.</div>
+    </div>
+    <div class="infra-item">
+      <div class="name"><span class="status s-missing"></span> Container Registry</div>
+      <div class="detail">No images in GHCR. No Dockerfiles for products.</div>
+    </div>
+    <div class="infra-item">
+      <div class="name"><span class="status s-missing"></span> Secrets Management</div>
+      <div class="detail">No Vault. Missing ANTHROPIC_API_KEY + 4 others.</div>
+    </div>
+    <div class="infra-item">
+      <div class="name"><span class="status s-missing"></span> Security Hardening</div>
+      <div class="detail">7 open tasks. 33 MITRE items. Pen test not done.</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ===== GAP REGISTER ===== -->
+<div class="gap-register">
+  <h3 style="color: #ef4444; font-size: 15px; margin-bottom: 6px;">Gap Register — 25 Items (Revised)</h3>
+  <p style="color: #555; font-size: 11px; margin-bottom: 16px;">Now includes framework-level gaps (the Agentics layer itself) that v1 missed entirely.</p>
+
+  <div style="margin-bottom: 12px;">
+    <div style="color: #c084fc; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Framework Gaps (NEW — missed in v1)</div>
+    <div class="gap-grid">
+      <div class="gap-row"><span class="gap-id">FW-01</span><div><div class="gap-text">Agent Handoff Protocol — no formal way to pass context/artifacts between AI instances</div></div></div>
+      <div class="gap-row"><span class="gap-id">FW-02</span><div><div class="gap-text">Context Packages — no standard boot context for spinning up a new agent session</div></div></div>
+      <div class="gap-row"><span class="gap-id">FW-03</span><div><div class="gap-text">Cross-Agent Traceability — no audit trail of which agent produced what</div></div></div>
+      <div class="gap-row"><span class="gap-id">FW-04</span><div><div class="gap-text">Agent Role Registry — no catalog of active agents, their platforms, roles, and repo access</div></div></div>
+      <div class="gap-row"><span class="gap-id">FW-05</span><div><div class="gap-text">Agent Definition Templates — described in Agentics doc but not implemented anywhere</div></div></div>
+      <div class="gap-row"><span class="gap-id">FW-06</span><div><div class="gap-text">Orchestrator Workload Visibility — no dashboard showing what each agent is working on</div></div></div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 12px;">
+    <div style="color: #22d3ee; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Signal Layer Gaps</div>
+    <div class="gap-grid">
+      <div class="gap-row"><span class="gap-id">SIG-01</span><div><div class="gap-text">Signal Schema — no formal data model; WP posts with ad-hoc meta</div></div></div>
+      <div class="gap-row"><span class="gap-id">SIG-02</span><div><div class="gap-text">Intent Classification — every signal should carry intent tags</div></div></div>
+      <div class="gap-row"><span class="gap-id">SIG-03</span><div><div class="gap-text">Sports Analytics — no feeds, data sources, or scoring model</div></div></div>
+      <div class="gap-row"><span class="gap-id">SIG-04</span><div><div class="gap-text">Manual Signal Input — no UI for human-submitted signals</div></div></div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 12px;">
+    <div style="color: #a78bfa; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Meaning Layer Gaps</div>
+    <div class="gap-grid">
+      <div class="gap-row"><span class="gap-id">MNG-01</span><div><div class="gap-text">Domain Weighting Engine — hardcoded multipliers in prompt text</div></div></div>
+      <div class="gap-row"><span class="gap-id">MNG-02</span><div><div class="gap-text">Pattern Agent — no narrative/analytical pattern extraction</div></div></div>
+      <div class="gap-row"><span class="gap-id">MNG-03</span><div><div class="gap-text">Pattern Library — no reusable pattern database</div></div></div>
+      <div class="gap-row"><span class="gap-id">MNG-04</span><div><div class="gap-text">Intent Agent — no domain + intent classification agent</div></div></div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 12px;">
+    <div style="color: #fbbf24; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Output Layer Gaps</div>
+    <div class="gap-grid">
+      <div class="gap-row"><span class="gap-id">OUT-01</span><div><div class="gap-text">Content Lab — no orchestration workspace for drafting/iteration</div></div></div>
+      <div class="gap-row"><span class="gap-id">OUT-02</span><div><div class="gap-text">Content Agent — no AI draft generation</div></div></div>
+      <div class="gap-row"><span class="gap-id">OUT-03</span><div><div class="gap-text">Distribution Agent — no automated multi-channel publishing</div></div></div>
+      <div class="gap-row"><span class="gap-id">OUT-04</span><div><div class="gap-text">Feedback Agent — no engagement signal extraction loop</div></div></div>
+      <div class="gap-row"><span class="gap-id">OUT-05</span><div><div class="gap-text">Book Pipeline — no long-form content workflow</div></div></div>
+      <div class="gap-row"><span class="gap-id">OUT-06</span><div><div class="gap-text">Archive Page — /the-markdown-archive/ returns 404</div></div></div>
+    </div>
+  </div>
+
+  <div>
+    <div style="color: #4ade80; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Infrastructure Gaps</div>
+    <div class="gap-grid">
+      <div class="gap-row"><span class="gap-id">INF-01</span><div><div class="gap-text">API Abstraction — no unified API; everything is wp_options + snippets</div></div></div>
+      <div class="gap-row"><span class="gap-id">INF-02</span><div><div class="gap-text">K8s Manifests — 64 files committed, none applied to cluster</div></div></div>
+      <div class="gap-row"><span class="gap-id">INF-03</span><div><div class="gap-text">Container Images — nothing built or pushed to GHCR</div></div></div>
+      <div class="gap-row"><span class="gap-id">INF-04</span><div><div class="gap-text">GitHub Secrets — 5 critical secrets not configured</div></div></div>
+      <div class="gap-row"><span class="gap-id">INF-05</span><div><div class="gap-text">Monitoring — Prometheus/Grafana/Loki YAML only, not running</div></div></div>
+      <div class="gap-row"><span class="gap-id">INF-06</span><div><div class="gap-text">Traceability — no Signal → Output lineage tracking system</div></div></div>
+      <div class="gap-row"><span class="gap-id">INF-07</span><div><div class="gap-text">System Dashboard — no operational visibility</div></div></div>
+      <div class="gap-row"><span class="gap-id">INF-08</span><div><div class="gap-text">Security — 7 open tasks + 33 MITRE ATT&CK items unmitigated</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 32px; padding: 16px; border: 1px solid #222; border-radius: 8px; background: #0d0d14;">
+  <p style="font-size: 11px; color: #555;">
+    <strong style="color:#888;">Key correction from v1:</strong> The Agentics model is not a software layer inside The Markdown. It is the <em>project execution framework</em> — the way Justin distributes work across multiple AI instances with separate context boundaries. Each "agent" in the Agentics doc maps to an actual AI account/session, not a microservice. GitHub is the coordination fabric. Justin is the orchestrator who bridges context between isolated agents.<br><br>
+    <strong style="color:#888;">Implication:</strong> The biggest gap category (FW-01 through FW-06) was invisible in v1. The framework that holds everything together — agent handoffs, context bootstrapping, cross-agent traceability, role registry — has no implementation at all. It runs entirely through Justin's manual effort.<br><br>
+    <strong style="color:#888;">Source:</strong> 3 PDFs, 3 GitHub repos + wikis, 3 project boards, live site audit | March 20, 2026
+  </p>
+</div>
+
+</body>
+</html>

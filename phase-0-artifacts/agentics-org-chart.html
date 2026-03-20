@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentics — Organizational Chart</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #08080d; color: #e0e0e0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 24px; min-height: 100vh; overflow-x: auto; }
+
+  .chart { display: flex; flex-direction: column; align-items: center; min-width: 1100px; }
+
+  /* ===== CONNECTOR LINES ===== */
+  .vline { width: 2px; height: 28px; background: #333; margin: 0 auto; }
+  .vline-short { width: 2px; height: 16px; background: #333; margin: 0 auto; }
+  .hline-group { display: flex; align-items: flex-start; justify-content: center; position: relative; }
+  .hline-group::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 2px;
+    background: #333;
+  }
+
+  /* ===== TOP: FOUNDER ===== */
+  .founder {
+    background: linear-gradient(135deg, #1a1000 0%, #2a1800 100%);
+    border: 2px solid #f59e0b;
+    border-radius: 12px;
+    padding: 16px 32px;
+    text-align: center;
+    position: relative;
+    min-width: 320px;
+  }
+  .founder h2 { color: #f59e0b; font-size: 18px; margin-bottom: 2px; }
+  .founder .title { color: #d97706; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+  .founder .desc { color: #888; font-size: 11px; margin-top: 6px; }
+  .founder-badge { display: inline-block; background: #422006; color: #fbbf24; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 3px; margin-top: 6px; letter-spacing: 0.5px; }
+
+  /* ===== BRAND BAR ===== */
+  .brand-bar {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin: 0;
+  }
+  .brand-card {
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-align: center;
+    min-width: 180px;
+  }
+  .brand-card h4 { font-size: 13px; margin-bottom: 2px; }
+  .brand-card p { font-size: 10px; }
+  .bc-ns { background: rgba(245,158,11,0.08); border: 1px solid #422006; }
+  .bc-ns h4 { color: #f59e0b; }
+  .bc-ns p { color: #92400e; }
+  .bc-ag { background: rgba(139,92,246,0.08); border: 1px solid #3b0764; }
+  .bc-ag h4 { color: #a78bfa; }
+  .bc-ag p { color: #6d28d9; }
+  .bc-a3 { background: rgba(6,182,212,0.08); border: 1px solid #164e63; }
+  .bc-a3 h4 { color: #22d3ee; }
+  .bc-a3 p { color: #0e7490; }
+
+  /* ===== TOWER SECTION ===== */
+  .towers-container {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .tower {
+    flex: 1;
+    max-width: 220px;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .tower-header {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 8px 8px 0 0;
+    text-align: center;
+    border-bottom: none;
+  }
+  .tower-header h3 { font-size: 13px; margin-bottom: 1px; }
+  .tower-header .role { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+
+  .tower-body {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .tower-cell {
+    width: 100%;
+    padding: 8px 12px;
+    border-left: 1px solid #222;
+    border-right: 1px solid #222;
+    border-bottom: 1px solid #1a1a1a;
+    background: #0c0c14;
+    font-size: 10px;
+  }
+  .tower-cell:last-child { border-radius: 0 0 8px 8px; border-bottom: 1px solid #222; }
+  .tower-cell .cell-label { color: #555; font-size: 8px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; margin-bottom: 2px; }
+  .tower-cell .cell-value { color: #ccc; font-size: 11px; }
+  .tower-cell .cell-sub { color: #444; font-size: 9px; margin-top: 1px; }
+
+  .cell-status { display: inline-block; width: 6px; height: 6px; border-radius: 1px; margin-right: 3px; vertical-align: middle; }
+  .cs-active { background: #22c55e; }
+  .cs-partial { background: #eab308; }
+  .cs-planned { background: #ef4444; }
+  .cs-concept { background: #8b5cf6; }
+
+  /* Tower colors */
+  .th-architect { background: rgba(96,165,250,0.12); border: 1px solid #1e3a5f; border-bottom: none; }
+  .th-architect h3 { color: #60a5fa; }
+  .th-architect .role { color: #1d4ed8; }
+
+  .th-builder { background: rgba(74,222,128,0.12); border: 1px solid #052e16; border-bottom: none; }
+  .th-builder h3 { color: #4ade80; }
+  .th-builder .role { color: #15803d; }
+
+  .th-editorial { background: rgba(251,191,36,0.12); border: 1px solid #422006; border-bottom: none; }
+  .th-editorial h3 { color: #fbbf24; }
+  .th-editorial .role { color: #a16207; }
+
+  .th-creative { background: rgba(192,132,252,0.12); border: 1px solid #3b0764; border-bottom: none; }
+  .th-creative h3 { color: #c084fc; }
+  .th-creative .role { color: #7c3aed; }
+
+  .th-infra { background: rgba(34,211,238,0.12); border: 1px solid #164e63; border-bottom: none; }
+  .th-infra h3 { color: #22d3ee; }
+  .th-infra .role { color: #0891b2; }
+
+  .th-client { background: rgba(248,113,113,0.10); border: 1px solid #3b1111; border-bottom: none; border-style: dashed; }
+  .th-client h3 { color: #f87171; }
+  .th-client .role { color: #b91c1c; }
+
+  /* ===== FOUNDATION BAR ===== */
+  .foundation {
+    width: 100%;
+    max-width: 1100px;
+    margin-top: 20px;
+    padding: 14px 20px;
+    border: 1px solid #052e16;
+    border-radius: 8px;
+    background: rgba(34,197,94,0.04);
+    text-align: center;
+  }
+  .foundation h4 { color: #22c55e; font-size: 13px; margin-bottom: 4px; }
+  .foundation p { color: #555; font-size: 10px; }
+  .infra-tags { display: flex; gap: 8px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
+  .infra-tag { font-size: 9px; padding: 3px 8px; border-radius: 3px; font-weight: 600; }
+  .it-active { background: #052e16; color: #4ade80; }
+  .it-partial { background: #1a1a00; color: #eab308; }
+  .it-missing { background: #1a0808; color: #f87171; }
+
+  /* ===== SECTION LABELS ===== */
+  .section-label {
+    width: 100%;
+    max-width: 1100px;
+    text-align: left;
+    margin: 20px 0 8px 0;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #444;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: #1a1a24; }
+
+  /* connector fan */
+  .fan-connector {
+    width: 100%;
+    max-width: 1100px;
+    height: 24px;
+    position: relative;
+  }
+  .fan-connector::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 12px;
+    background: #333;
+    transform: translateX(-50%);
+  }
+  .fan-connector::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: calc(50% - 500px);
+    width: 1000px;
+    height: 2px;
+    background: #333;
+  }
+
+  .tower-connectors {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    width: 100%;
+    max-width: 1100px;
+  }
+  .tc-line { flex: 1; max-width: 220px; min-width: 180px; display: flex; justify-content: center; }
+  .tc-line::before { content: ''; display: block; width: 2px; height: 12px; background: #333; }
+
+  /* Legend */
+  .legend { display: flex; gap: 16px; margin-top: 24px; justify-content: center; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #666; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="chart">
+
+  <!-- ===== FOUNDER / ORCHESTRATOR ===== -->
+  <div class="founder">
+    <h2>Justin Kuiper</h2>
+    <div class="title">Founder · Orchestrator</div>
+    <div class="desc">Routes work across AI agents · Bridges context between sessions · Final judgment on all output</div>
+    <div><span class="founder-badge">HUMAN IN THE LOOP</span></div>
+  </div>
+
+  <div class="vline"></div>
+
+  <!-- ===== BRAND / IDENTITY LAYER ===== -->
+  <div class="section-label">Brand & Identity Layer</div>
+  <div class="brand-bar">
+    <div class="brand-card bc-ns">
+      <h4>Non Sequitur</h4>
+      <p>Client-facing brand · Experience layer</p>
+    </div>
+    <div class="brand-card bc-ag">
+      <h4>Agentics</h4>
+      <p>Manufacturing floor · Operating model</p>
+    </div>
+    <div class="brand-card bc-a3">
+      <h4>ag3ntics</h4>
+      <p>Technical identity · System domain</p>
+    </div>
+  </div>
+
+  <!-- ===== FAN OUT TO TOWERS ===== -->
+  <div class="fan-connector"></div>
+  <div class="tower-connectors">
+    <div class="tc-line"></div>
+    <div class="tc-line"></div>
+    <div class="tc-line"></div>
+    <div class="tc-line"></div>
+    <div class="tc-line"></div>
+    <div class="tc-line"></div>
+  </div>
+
+  <!-- ===== SECTION LABEL ===== -->
+  <div class="section-label">Vertical Towers — AI Agent Divisions</div>
+
+  <!-- ===== THE TOWERS ===== -->
+  <div class="towers-container">
+
+    <!-- TOWER 1: ARCHITECT -->
+    <div class="tower">
+      <div class="tower-header th-architect">
+        <h3>The Architect</h3>
+        <div class="role">System Design & Strategy</div>
+      </div>
+      <div class="tower-body">
+        <div class="tower-cell">
+          <div class="cell-label">Platform</div>
+          <div class="cell-value">Claude · Account A</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Function</div>
+          <div class="cell-value">Architecture, data models, API design, gap analysis, technical strategy</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Repos</div>
+          <div class="cell-value" style="font-family: monospace; font-size: 9px;">the-foremans-build-stack<br>robo-stack<br>content-ops</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Outputs</div>
+          <div class="cell-value">Architecture docs, design specs, gap registers, project plans</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Status</div>
+          <div class="cell-value"><span class="cell-status cs-active"></span> Active</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOWER 2: BUILDER -->
+    <div class="tower">
+      <div class="tower-header th-builder">
+        <h3>The Builder</h3>
+        <div class="role">Product Development</div>
+      </div>
+      <div class="tower-body">
+        <div class="tower-cell">
+          <div class="cell-label">Platform</div>
+          <div class="cell-value">Claude · Account B</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Function</div>
+          <div class="cell-value">Code development, WordPress snippets, APIs, pipelines, feature implementation</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Repos</div>
+          <div class="cell-value" style="font-family: monospace; font-size: 9px;">the-markdown<br>content-ops</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Outputs</div>
+          <div class="cell-value">Production code, CI/CD pipelines, deployed features</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Status</div>
+          <div class="cell-value"><span class="cell-status cs-active"></span> Active · 87% on The Markdown</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOWER 3: EDITORIAL -->
+    <div class="tower">
+      <div class="tower-header th-editorial">
+        <h3>The Editor</h3>
+        <div class="role">Content & Editorial</div>
+      </div>
+      <div class="tower-body">
+        <div class="tower-cell">
+          <div class="cell-label">Platform</div>
+          <div class="cell-value">Claude · Cowork / Account C</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Function</div>
+          <div class="cell-value">Content review, editorial decisions, scoring refinement, quality control</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Repos</div>
+          <div class="cell-value" style="font-family: monospace; font-size: 9px;">the-markdown<br>content-ops</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Outputs</div>
+          <div class="cell-value">Curated daily briefings, editorial board decisions, Yeti's Take commentary</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Status</div>
+          <div class="cell-value"><span class="cell-status cs-partial"></span> Partially active</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOWER 4: CREATIVE -->
+    <div class="tower">
+      <div class="tower-header th-creative">
+        <h3>The Creative</h3>
+        <div class="role">Design & Content Creation</div>
+      </div>
+      <div class="tower-body">
+        <div class="tower-cell">
+          <div class="cell-label">Platform</div>
+          <div class="cell-value">ChatGPT / Canva / TBD</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Function</div>
+          <div class="cell-value">Visual design, social media content, brand assets, presentations, video</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Repos</div>
+          <div class="cell-value" style="font-family: monospace; font-size: 9px;">TBD</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Outputs</div>
+          <div class="cell-value">Hero images, social cards, brand collateral, video content</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Status</div>
+          <div class="cell-value"><span class="cell-status cs-concept"></span> Needs definition</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOWER 5: INFRASTRUCTURE -->
+    <div class="tower">
+      <div class="tower-header th-infra">
+        <h3>The Engineer</h3>
+        <div class="role">DevOps & Infrastructure</div>
+      </div>
+      <div class="tower-body">
+        <div class="tower-cell">
+          <div class="cell-label">Platform</div>
+          <div class="cell-value">Windsurf / Claude · DevOps</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Function</div>
+          <div class="cell-value">Cloud infra, K8s, CI/CD, security hardening, monitoring, deployments</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Repos</div>
+          <div class="cell-value" style="font-family: monospace; font-size: 9px;">robo-stack<br>the-foremans-build-stack</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Outputs</div>
+          <div class="cell-value">Terraform, K8s manifests, GH Actions, security configs</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Status</div>
+          <div class="cell-value"><span class="cell-status cs-partial"></span> Infra built, not fully deployed</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOWER 6: CLIENT / EXPANSION -->
+    <div class="tower">
+      <div class="tower-header th-client" style="border-bottom-style: dashed;">
+        <h3>Client Tower(s)</h3>
+        <div class="role">Future · Repeatable</div>
+      </div>
+      <div class="tower-body">
+        <div class="tower-cell" style="border-style: dashed; border-color: #222;">
+          <div class="cell-label">Platform</div>
+          <div class="cell-value" style="color: #666;">Assigned per project</div>
+        </div>
+        <div class="tower-cell" style="border-style: dashed; border-color: #222;">
+          <div class="cell-label">Function</div>
+          <div class="cell-value" style="color: #666;">Client spec → digital product delivery. Websites, apps, content platforms.</div>
+        </div>
+        <div class="tower-cell" style="border-style: dashed; border-color: #222;">
+          <div class="cell-label">Repos</div>
+          <div class="cell-value" style="font-family: monospace; font-size: 9px; color: #444;">project-{client-name}</div>
+        </div>
+        <div class="tower-cell" style="border-style: dashed; border-color: #222;">
+          <div class="cell-label">Outputs</div>
+          <div class="cell-value" style="color: #666;">Delivered digital products. Revenue.</div>
+        </div>
+        <div class="tower-cell" style="border-style: dashed; border-color: #222; border-radius: 0 0 8px 8px;">
+          <div class="cell-label">Status</div>
+          <div class="cell-value"><span class="cell-status cs-planned"></span> Future — requires FW gaps closed</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== PROJECTS BAR ===== -->
+  <div class="section-label" style="margin-top: 24px;">Active Projects — What the Towers Produce</div>
+  <div style="display: flex; gap: 12px; width: 100%; max-width: 1100px;">
+    <div style="flex: 2; padding: 12px 16px; border: 1px solid #422006; border-radius: 8px; background: rgba(245,158,11,0.04);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <h4 style="color: #f59e0b; font-size: 13px;">The Markdown</h4>
+        <span style="font-size: 9px; padding: 2px 6px; border-radius: 3px; background: #422006; color: #fbbf24;">87% COMPLETE</span>
+      </div>
+      <p style="color: #777; font-size: 10px; margin-bottom: 6px;">Content curation platform · RSS → AI Scoring → Editorial → Daily Briefing + Email + Social</p>
+      <p style="color: #555; font-size: 9px;">Towers involved: Builder (primary), Editor, Engineer · Repo: the-markdown · Host: WordPress</p>
+    </div>
+    <div style="flex: 1; padding: 12px 16px; border: 1px solid #052e16; border-radius: 8px; background: rgba(34,197,94,0.04);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <h4 style="color: #22c55e; font-size: 13px;">Robo Stack</h4>
+        <span style="font-size: 9px; padding: 2px 6px; border-radius: 3px; background: #052e16; color: #4ade80;">SPRINT 4</span>
+      </div>
+      <p style="color: #777; font-size: 10px; margin-bottom: 6px;">Shared cloud infrastructure · AWS + K3s + CI/CD + Monitoring</p>
+      <p style="color: #555; font-size: 9px;">Towers involved: Engineer (primary), Architect · Repo: robo-stack</p>
+    </div>
+    <div style="flex: 1; padding: 12px 16px; border: 1px solid #3b0764; border-radius: 8px; background: rgba(139,92,246,0.04); border-style: dashed;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <h4 style="color: #a78bfa; font-size: 13px;">Content Ops</h4>
+        <span style="font-size: 9px; padding: 2px 6px; border-radius: 3px; background: #3b0764; color: #c084fc;">SPRINT 0</span>
+      </div>
+      <p style="color: #777; font-size: 10px; margin-bottom: 6px;">Content Refinery Platform · Pipeline: Capture → Publish</p>
+      <p style="color: #555; font-size: 9px;">Towers involved: Architect, Builder · Repo: content-ops · Blocked</p>
+    </div>
+  </div>
+
+  <!-- ===== FOUNDATION ===== -->
+  <div class="section-label" style="margin-top: 24px;">Foundation — Yeti Knowledge Systems (YKS)</div>
+  <div class="foundation">
+    <h4>YKS Platform & Infrastructure</h4>
+    <p>Shared services that all towers and projects build on</p>
+    <div class="infra-tags">
+      <span class="infra-tag it-active">AWS VPC + EC2 ✓</span>
+      <span class="infra-tag it-active">GitHub (4 repos) ✓</span>
+      <span class="infra-tag it-active">CI/CD Pipelines ✓</span>
+      <span class="infra-tag it-active">WordPress CMS ✓</span>
+      <span class="infra-tag it-partial">K3s Cluster (YAML only)</span>
+      <span class="infra-tag it-missing">Monitoring ✗</span>
+      <span class="infra-tag it-missing">Container Registry ✗</span>
+      <span class="infra-tag it-missing">Secrets Mgmt ✗</span>
+      <span class="infra-tag it-missing">Security Hardening ✗</span>
+    </div>
+  </div>
+
+  <!-- ===== MENTORSHIP CALLOUT ===== -->
+  <div style="margin-top: 20px; width: 100%; max-width: 1100px; padding: 14px 20px; border: 1px solid #1e3a5f; border-radius: 8px; background: rgba(96,165,250,0.04); display: flex; gap: 16px; align-items: center;">
+    <div style="font-size: 28px;">🎓</div>
+    <div>
+      <h4 style="color: #60a5fa; font-size: 13px; margin-bottom: 2px;">Mentorship Track</h4>
+      <p style="color: #666; font-size: 11px;">This entire org structure doubles as a technology mentorship environment. Each tower is a learning station — your son can rotate through Architecture, Building, Editorial, Creative, and Engineering, working alongside AI agents in real production workflows.</p>
+    </div>
+  </div>
+
+  <!-- ===== LEGEND ===== -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot dot-built"></div> Active</div>
+    <div class="legend-item"><div class="legend-dot dot-partial"></div> Partial</div>
+    <div class="legend-item"><div class="legend-dot dot-missing"></div> Planned</div>
+    <div class="legend-item"><div class="legend-dot dot-conceptual"></div> Needs Definition</div>
+  </div>
+
+  <p style="color: #333; font-size: 10px; margin-top: 16px; text-align: center;">Agentics Org Chart v1 · Draft for refinement · March 20, 2026</p>
+
+</div>
+
+</body>
+</html>
