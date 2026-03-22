@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sprint 6 Plan — Agentics MVP | The Foreman's Build Stack</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --red: #f85149;
+      --yellow: #d29922;
+      --orange: #db6d28;
+      --purple: #bc8cff;
+      --cyan: #39d2c0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header {
+      margin-bottom: 40px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 30px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(88, 166, 255, 0.15);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      border: 1px solid rgba(88, 166, 255, 0.3);
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin: 16px 0;
+      font-weight: 700;
+    }
+
+    .meta {
+      display: flex;
+      gap: 24px;
+      margin-top: 16px;
+      font-size: 14px;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    h2 {
+      font-size: 1.8em;
+      margin: 32px 0 16px 0;
+      font-weight: 700;
+      color: var(--accent);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 12px;
+    }
+
+    h3 {
+      font-size: 1.3em;
+      margin: 24px 0 12px 0;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    h4 {
+      font-size: 1.1em;
+      margin: 16px 0 8px 0;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    p {
+      margin: 12px 0;
+      color: var(--text);
+    }
+
+    ul, ol {
+      margin: 12px 0 12px 24px;
+      color: var(--text);
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 2em;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 8px 0;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .callout {
+      background: rgba(88, 166, 255, 0.1);
+      border-left: 4px solid var(--accent);
+      padding: 16px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+
+    .callout.goal {
+      background: rgba(63, 185, 80, 0.1);
+      border-left-color: var(--green);
+    }
+
+    .callout.warning {
+      background: rgba(248, 81, 73, 0.1);
+      border-left-color: var(--red);
+    }
+
+    .callout.info {
+      background: rgba(88, 166, 255, 0.1);
+      border-left-color: var(--accent);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    thead {
+      background: rgba(88, 166, 255, 0.1);
+    }
+
+    th {
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+      color: var(--accent);
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover {
+      background: rgba(88, 166, 255, 0.05);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+
+    .story-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+
+    .story-card h4 {
+      margin-top: 0;
+      color: var(--accent);
+      font-size: 1.1em;
+    }
+
+    .story-meta {
+      display: flex;
+      gap: 12px;
+      margin: 8px 0 12px 0;
+      flex-wrap: wrap;
+      font-size: 13px;
+    }
+
+    .meta-tag {
+      background: rgba(88, 166, 255, 0.15);
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(88, 166, 255, 0.3);
+      font-weight: 500;
+    }
+
+    .dep-tag {
+      background: rgba(220, 109, 40, 0.15);
+      color: var(--orange);
+      border: 1px solid rgba(220, 109, 40, 0.3);
+    }
+
+    .phase-tag {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+      border: 1px solid;
+      display: inline-block;
+    }
+
+    .phase-backlog {
+      background: rgba(210, 153, 34, 0.15);
+      color: var(--yellow);
+      border: 1px solid rgba(210, 153, 34, 0.3);
+    }
+
+    .phase-overwatch {
+      background: rgba(248, 81, 73, 0.12);
+      color: var(--red);
+      border: 1px solid rgba(248, 81, 73, 0.3);
+    }
+
+    .phase-ops {
+      background: rgba(57, 210, 192, 0.12);
+      color: var(--cyan);
+      border: 1px solid rgba(57, 210, 192, 0.3);
+    }
+
+    .phase-normal {
+      background: rgba(88, 166, 255, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(88, 166, 255, 0.3);
+    }
+
+    .story-desc {
+      color: var(--text);
+      margin: 12px 0;
+      line-height: 1.6;
+    }
+
+    .story-acceptance {
+      margin: 12px 0;
+    }
+
+    .story-acceptance h5 {
+      font-size: 0.95em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      margin: 8px 0 6px 0;
+    }
+
+    .story-acceptance ul {
+      margin: 6px 0 0 24px;
+      font-size: 0.95em;
+    }
+
+    .toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .toc h3 {
+      margin-top: 0;
+    }
+
+    .toc ol {
+      margin: 12px 0 0 24px;
+    }
+
+    .toc li {
+      margin: 6px 0;
+    }
+
+    .toc a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .toc a:hover {
+      text-decoration: underline;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .subsprint-header {
+      background: rgba(88, 166, 255, 0.15);
+      border: 1px solid rgba(88, 166, 255, 0.3);
+      padding: 16px;
+      border-radius: 6px;
+      margin: 24px 0 16px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .subsprint-title {
+      font-size: 1.2em;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .subsprint-gap {
+      font-size: 0.9em;
+      color: var(--text-muted);
+    }
+
+    .ascii-diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 20px 0;
+      font-family: "Courier New", monospace;
+      font-size: 11px;
+      line-height: 1.4;
+      color: var(--accent);
+    }
+
+    .risk-high {
+      color: var(--red);
+    }
+
+    .risk-medium {
+      color: var(--yellow);
+    }
+
+    .risk-low {
+      color: var(--green);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding-top: 30px;
+      margin-top: 40px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+      margin: 0 8px;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    .acceptance-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    .acceptance-table th,
+    .acceptance-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .acceptance-table th {
+      background: rgba(88, 166, 255, 0.1);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .acceptance-table tr:hover {
+      background: rgba(88, 166, 255, 0.05);
+    }
+
+    code {
+      background: rgba(88, 166, 255, 0.15);
+      color: var(--cyan);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="badge">Planning</span>
+      <h1>Sprint 6 — Agentics MVP</h1>
+      <div class="meta">
+        <div class="meta-item">
+          <strong>Epic 6:</strong> Distributed AI Agent Framework & Content Pipeline
+        </div>
+        <div class="meta-item">
+          <strong>Timeline:</strong> March 2026 · 2 weeks
+        </div>
+        <div class="meta-item">
+          <strong>Prior Sprint:</strong> Sprint 5 (Bare Metal Hybrid Stack)
+        </div>
+      </div>
+    </header>
+
+    <div class="metrics">
+      <div class="metric-card">
+        <div class="metric-label">Subsprints</div>
+        <div class="metric-value">9</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Stories</div>
+        <div class="metric-value">~35</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Execution Waves</div>
+        <div class="metric-value">9</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Gaps Targeted</div>
+        <div class="metric-value">10 of 25</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Towers Activated</div>
+        <div class="metric-value">5</div>
+      </div>
+    </div>
+
+    <div class="callout goal">
+      <strong>Sprint Goal:</strong> Make the Agentics operating system minimally functional. By sprint end, all 5 agent towers have boot contexts, the handoff protocol is automated via GitHub, cross-agent traceability is in place, and one signal has been processed through the complete Signal → Meaning → Output pipeline.
+    </div>
+
+    <div class="toc">
+      <h3>Table of Contents</h3>
+      <ol>
+        <li><a href="#architecture">Agentics Architecture Overview</a></li>
+        <li><a href="#sprint-dependencies">Sprint 5 Dependencies</a></li>
+        <li><a href="#subsprints">Subsprints & Stories Overview</a></li>
+        <li><a href="#subsprint-6-1">Subsprint 6.1 — Boot Context Packages</a></li>
+        <li><a href="#subsprint-6-2">Subsprint 6.2 — Agent Role Registry & Template Completion</a></li>
+        <li><a href="#subsprint-6-3">Subsprint 6.3 — Handoff Protocol Automation</a></li>
+        <li><a href="#subsprint-6-4">Subsprint 6.4 — Cross-Agent Traceability & Provenance</a></li>
+        <li><a href="#subsprint-6-5">Subsprint 6.5 — Tower Activation — First Real Tasks</a></li>
+        <li><a href="#subsprint-6-6">Subsprint 6.6 — Pipeline Demo — Signal → Meaning → Output</a></li>
+        <li><a href="#subsprint-6-7">Subsprint 6.7 — BACKLOG</a></li>
+        <li><a href="#subsprint-6-8">Subsprint 6.8 — OVERWATCH</a></li>
+        <li><a href="#subsprint-6-9">Subsprint 6.9 — OPERATIONS</a></li>
+        <li><a href="#gap-impact">Gap Register Impact</a></li>
+        <li><a href="#execution-waves">Execution Waves</a></li>
+        <li><a href="#risk-register">Risk Register</a></li>
+        <li><a href="#acceptance-criteria">Sprint Acceptance Criteria</a></li>
+      </ol>
+    </div>
+
+    <h2 id="architecture">Agentics Architecture Overview</h2>
+
+    <div class="ascii-diagram">
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    THE FOREMAN'S BUILD STACK — AGENTICS ARCHITECTURE    │
+└─────────────────────────────────────────────────────────────────────────┘
+
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                      ORCHESTRATOR (The Founder)                         │
+    │                   Justin / AI-assisted coordination                     │
+    └────────┬──────────┬──────────┬──────────┬──────────┬───────────────────┘
+             │          │          │          │          │
+    ┌────────▼───┐ ┌────▼─────┐ ┌─▼────────┐ ┌▼────────┐ ┌▼──────────┐
+    │ ARCHITECT  │ │ BUILDER  │ │ ENGINEER │ │ EDITOR  │ │ CREATIVE  │
+    │ Tower      │ │ Tower    │ │ Tower    │ │ Tower   │ │ Tower     │
+    │            │ │          │ │          │ │         │ │           │
+    │ • Design   │ │ • Code   │ │ • Infra  │ │ • Cont. │ │ • Brand   │
+    │ • Schema   │ │ • Impl.  │ │ • Deploy │ │ • Quality│ │ • Visual  │
+    │ • Standards│ │ • Test   │ │ • Monitor│ │ • Edit  │ │ • Design  │
+    └────────────┘ └──────────┘ └──────────┘ └─────────┘ └───────────┘
+             │          │          │          │          │
+    ┌────────▼──────────▼──────────▼──────────▼──────────▼───────────────┐
+    │                   HANDOFF PROTOCOL (GitHub Issues/PRs)              │
+    │             Boot Contexts → Task → Artifact → Handoff               │
+    └────────────────────────────────────────────────────────────────────┘
+             │                                                     │
+    ┌────────▼─────────────────────────────────────────────────────▼─────┐
+    │                THE MARKDOWN — CONTENT PIPELINE                       │
+    │                                                                   │
+    │ SIGNAL ────────▶ MEANING ────────▶ OUTPUT                         │
+    │ (RSS, Manual)   (Domain, Intent,  (Articles, Social,              │
+    │                  Patterns)         Distribution)                   │
+    └────────────────────────────────────────────────────────────────────┘
+    </div>
+
+    <p>Sprint 6 activates all 5 towers of the Agentics operating system, establishing the framework for distributed AI agent collaboration, task handoff, and content pipeline orchestration.</p>
+
+    <h2 id="sprint-dependencies">Sprint 5 Dependencies</h2>
+
+    <div class="callout warning">
+      <strong>Critical Sprint 5 Deliverables Required:</strong> Sprint 6 execution depends on the following Sprint 5 completions:
+      <ul>
+        <li><strong>S5.7.1:</strong> <code>the-foremans-build-stack</code> repository on GitHub with full directory structure (framework/, projects/, control-plane/, docs/)</li>
+        <li><strong>S5.7.2:</strong> GitHub Issue and PR templates installed on all repos (handoff metadata sections)</li>
+        <li><strong>Infrastructure:</strong> K3s cluster running and operational (required for Engineer tower activation)</li>
+        <li><strong>CI/CD:</strong> Working CI/CD pipeline (required for Builder tower to test & deploy)</li>
+        <li><strong>The Markdown:</strong> WordPress instance accessible and ready for Signal Schema implementation</li>
+      </ul>
+    </div>
+
+    <h2 id="subsprints">Subsprints & Stories Overview</h2>
+
+    <p>Sprint 6 contains 9 subsprints, organized into 3 phases:</p>
+
+    <h3>Phase 1: Framework Foundation (Subsprints 6.1 – 6.4)</h3>
+    <p>Build the infrastructure for agent collaboration: boot contexts, role definitions, handoff automation, and traceability.</p>
+
+    <h3>Phase 2: Activation & Demo (Subsprints 6.5 – 6.6)</h3>
+    <p>Activate all 5 towers with real tasks and demonstrate the end-to-end Signal → Meaning → Output pipeline.</p>
+
+    <h3>Phase 3: Backlog, Security & Operations (Subsprints 6.7 – 6.9)</h3>
+    <p>Address remaining items, secure the framework against MITRE ATT&CK techniques, and establish operational procedures.</p>
+
+    <!-- SUBSPRINT 6.1 -->
+    <div id="subsprint-6-1">
+      <div class="subsprint-header">
+        <div>
+          <div class="subsprint-title">Subsprint 6.1 — Boot Context Packages</div>
+          <div class="subsprint-gap">Closes: FW-02 (Agent Boot Contexts)</div>
+        </div>
+        <span class="phase-tag phase-normal">Wave 1</span>
+      </div>
+
+      <p>Create standardized boot context packages for all 5 agent towers. Boot contexts are the startup configuration, knowledge base, and operational constraints for each agent. No dependencies — can run in parallel with 6.2.</p>
+
+      <div class="story-card">
+        <h4>S6.1.1 — Create builder-boot.md</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Builder Tower Lead</span>
+          <span class="meta-tag">Points: 5</span>
+        </div>
+        <div class="story-desc">Builder tower boot context. Define tools (Git, Docker, npm/Python), target repos, coding standards, deployment targets, testing requirements, and CI/CD integration points. Establishes the operating environment for code implementation tasks.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>builder-boot.md created in <code>framework/context-packages/</code></li>
+            <li>Includes all required sections: role definition, tools, repos, standards, deployment targets</li>
+            <li>References builder agent template</li>
+            <li>Can be loaded and executed by builder agent in cold-start scenario</li>
+            <li>Peer reviewed and merged to main</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.1.2 — Create engineer-boot.md</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Engineer Tower Lead</span>
+          <span class="meta-tag">Points: 5</span>
+        </div>
+        <div class="story-desc">Engineer tower boot context. Define infrastructure tools (Kubernetes, Docker, monitoring, observability), cluster access, logging/metrics setup, disaster recovery procedures, and monitoring dashboards. Operational knowledge for infrastructure agent.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>engineer-boot.md created in <code>framework/context-packages/</code></li>
+            <li>Includes K3s cluster details, container registry, observability stack</li>
+            <li>Documents access procedures and operational constraints</li>
+            <li>References engineer agent template</li>
+            <li>References Sprint 5 infrastructure documentation</li>
+            <li>Peer reviewed and merged to main</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.1.3 — Create editor-boot.md</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Editor Tower Lead</span>
+          <span class="meta-tag">Points: 4</span>
+        </div>
+        <div class="story-desc">Editor tower boot context. Define editorial standards, content review processes, publication workflows, brand voice guidelines, and approval chains. Knowledge for content quality assurance agent.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>editor-boot.md created in <code>framework/context-packages/</code></li>
+            <li>Links to editorial standards document (created in S6.5.4)</li>
+            <li>Defines review criteria and approval workflows</li>
+            <li>Includes brand voice and tone guidelines</li>
+            <li>References editor agent template</li>
+            <li>Peer reviewed and merged to main</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.1.4 — Create creative-boot.md</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Creative Tower Lead</span>
+          <span class="meta-tag">Points: 4</span>
+        </div>
+        <div class="story-desc">Creative tower boot context. Define brand kit access, visual design standards, asset library structure, design tools, and approval processes. Knowledge for brand/visual design agent.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>creative-boot.md created in <code>framework/context-packages/</code></li>
+            <li>References brand kit v1 (created in S6.5.5)</li>
+            <li>Documents asset library structure and naming conventions</li>
+            <li>Defines design tool ecosystem</li>
+            <li>References creative agent template</li>
+            <li>Peer reviewed and merged to main</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.1.5 — Update architect-boot.md</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect Tower Lead</span>
+          <span class="meta-tag">Points: 3</span>
+        </div>
+        <div class="story-desc">Refresh existing architect boot context with learnings from Sprint 5 and initial Sprint 6 planning. Update design frameworks, standards, and cross-tower coordination patterns discovered during infrastructure work.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>architect-boot.md updated with Sprint 5/6 learnings</li>
+            <li>Includes handoff protocol v1 reference</li>
+            <li>Documents tower coordination patterns</li>
+            <li>Reflects actual repo structure and dependencies</li>
+            <li>Peer reviewed and merged to main</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.1.6 — Create boot-context-template.md</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect Tower Lead</span>
+          <span class="meta-tag">Points: 3</span>
+        </div>
+        <div class="story-desc">Standardized template for future agent boot contexts. Provides structure and sections that all boot contexts should follow. Enables rapid onboarding of new agents or tower variants.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>boot-context-template.md created in <code>framework/context-packages/</code></li>
+            <li>Includes all major sections: role definition, tools, repos, standards, constraints</li>
+            <li>Annotated with guidance for each section</li>
+            <li>Used as basis for all 5 boot contexts</li>
+            <li>Merged to main</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBSPRINT 6.2 -->
+    <div id="subsprint-6-2">
+      <div class="subsprint-header">
+        <div>
+          <div class="subsprint-title">Subsprint 6.2 — Agent Role Registry & Template Completion</div>
+          <div class="subsprint-gap">Closes: FW-04 (Agent Registry), FW-05 (Agent Templates)</div>
+        </div>
+        <span class="phase-tag phase-normal">Wave 2</span>
+      </div>
+
+      <p>Create a comprehensive agent role registry and complete agent templates for Editor and Creative towers. Parallel execution with 6.1; both ready for 6.3.</p>
+
+      <div class="story-card">
+        <h4>S6.2.1 — Create agent-role-registry.md</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect Tower Lead</span>
+          <span class="meta-tag">Points: 5</span>
+        </div>
+        <div class="story-desc">Comprehensive catalog of all active agents in the Agentics system. Includes agent name, platform (Claude, Llama, GPT, etc.), assigned role/tower, repository access, capabilities, and active/inactive status. Published to GitHub Wiki for team discoverability. Closes FW-04.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>agent-role-registry.md created and documented</li>
+            <li>Includes all current agents (The Architect, The Builder, The Engineer, The Editor, The Creative)</li>
+            <li>Fields: name, platform, tower, role, repos, capabilities, status, created_date</li>
+            <li>Published to GitHub Wiki</li>
+            <li>Link to registry added to main README</li>
+            <li>Can be updated dynamically as new agents are onboarded</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.2.2 — Create the-editor.md agent template</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Editor Tower Lead</span>
+          <span class="meta-tag">Points: 4</span>
+        </div>
+        <div class="story-desc">Editorial/content quality agent role definition. Defines responsibilities (content review, editorial standards enforcement, style guide compliance), constraints (cannot publish without approval, cannot modify archived content), and decision-making authority. Template for Editor tower agents.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>the-editor.md created in <code>framework/agent-templates/</code></li>
+            <li>Includes role purpose, responsibilities, constraints, authority limits</li>
+            <li>Defines acceptance/rejection criteria for content</li>
+            <li>References editor-boot.md</li>
+            <li>Follows TEMPLATE.md structure</li>
+            <li>Peer reviewed and merged to main</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.2.3 — Create the-creative.md agent template</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Creative Tower Lead</span>
+          <span class="meta-tag">Points: 4</span>
+        </div>
+        <div class="story-desc">Brand/visual/design agent role definition. Defines responsibilities (brand asset creation, visual design, design system maintenance), constraints (must follow brand guidelines, cannot deprecate assets without approval), and decision authority. Template for Creative tower agents.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>the-creative.md created in <code>framework/agent-templates/</code></li>
+            <li>Includes role purpose, responsibilities, constraints, authority limits</li>
+            <li>Defines brand compliance checklist</li>
+            <li>References creative-boot.md and brand kit</li>
+            <li>Follows TEMPLATE.md structure</li>
+            <li>Peer reviewed and merged to main</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.2.4 — Update TEMPLATE.md</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect Tower Lead</span>
+          <span class="meta-tag">Points: 3</span>
+        </div>
+        <div class="story-desc">Refine the blank agent template based on lessons from implementing architect, builder, and engineer agent definitions. Add missing sections, clarify guidance, improve examples. Closes FW-05.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>TEMPLATE.md updated with all sections used by active agents</li>
+            <li>Includes examples from existing agents</li>
+            <li>Clarifies decision authority and constraint sections</li>
+            <li>Improves guidance for new tower definitions</li>
+            <li>Used successfully for 6.2.2 and 6.2.3</li>
+            <li>Merged to main</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.2.5 — Publish registry to GitHub Wiki</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect Tower Lead</span>
+          <span class="meta-tag">Points: 2</span>
+        </div>
+        <div class="story-desc">Publish agent-role-registry.md to GitHub Wiki for team discoverability. Create wiki navigation to agent registry and agent templates. Enable easy lookup of active agents and their capabilities.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Agent Registry published to wiki Home page</li>
+            <li>All 5 agents listed with current roles</li>
+            <li>Links from wiki to agent templates in repo</li>
+            <li>Wiki navigation sidebar updated</li>
+            <li>Easy discoverability for new team members</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBSPRINT 6.3 -->
+    <div id="subsprint-6-3">
+      <div class="subsprint-header">
+        <div>
+          <div class="subsprint-title">Subsprint 6.3 — Handoff Protocol Automation</div>
+          <div class="subsprint-gap">Closes: FW-01 (Handoff Protocol)</div>
+        </div>
+        <span class="phase-tag phase-normal">Wave 3</span>
+      </div>
+
+      <p>Automate the handoff protocol using GitHub Issues and PR templates. Depends on Sprint 5 (S5.7.2) template installation. Creates the infrastructure for agent-to-agent task transfer.</p>
+
+      <div class="story-card">
+        <h4>S6.3.1 — Create GitHub Issue templates for handoff packages</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect Tower Lead</span>
+          <span class="meta-tag">Points: 4</span>
+          <span class="meta-tag dep-tag">Depends: S5.7.2</span>
+        </div>
+        <div class="story-desc">Create standardized GitHub Issue templates that auto-populate handoff package sections: Summary, Artifacts, Decisions, Open Questions, Context References, Acceptance Criteria. Used for sending tasks between towers.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Issue template created with all handoff sections</li>
+            <li>Auto-population of Summary, Artifacts, Decisions, Open Questions, Context References, Acceptance Criteria</li>
+            <li>Includes tower tags (tower:architect, tower:builder, etc.)</li>
+            <li>Installed on all repos in the-foremans-build-stack</li>
+            <li>Tested with Architect → Builder handoff (S6.3.4)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.3.2 — Create GitHub PR templates with handoff metadata</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Builder Tower Lead</span>
+          <span class="meta-tag">Points: 3</span>
+          <span class="meta-tag dep-tag">Depends: S5.7.2</span>
+        </div>
+        <div class="story-desc">Create standardized PR templates that include handoff metadata: sending tower, receiving tower, artifact list, acceptance criteria. Used for returning completed work to sending tower.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>PR template created with handoff metadata</li>
+            <li>Includes Sending Tower, Receiving Tower, Artifact List fields</li>
+            <li>Links back to originating handoff issue</li>
+            <li>Installed on all repos</li>
+            <li>Tested with Builder → Architect handoff</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.3.3 — Create GitHub Labels for tower routing</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect Tower Lead</span>
+          <span class="meta-tag">Points: 2</span>
+        </div>
+        <div class="story-desc">Create standardized GitHub labels for tower routing and handoff tracking: tower:architect, tower:builder, tower:engineer, tower:editor, tower:creative, handoff, cross-tower. Applied to Issues and PRs for routing automation.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>All 5 tower labels created (color-coded)</li>
+            <li>handoff label created (distinguishes handoff issues)</li>
+            <li>cross-tower label created</li>
+            <li>Labels synced to all repos</li>
+            <li>Used in test handoff (S6.3.4)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.3.4 — Test handoff workflow: Architect → Builder handoff</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect Tower Lead</span>
+          <span class="meta-tag">Points: 5</span>
+          <span class="meta-tag dep-tag">Depends: S6.3.1, S6.3.2, S6.3.3</span>
+        </div>
+        <div class="story-desc">Execute a real handoff from Architect to Builder: Signal Schema design handoff. Architect creates Issue with schema design artifact, Builder receives it, implements as WordPress post type, returns PR with implementation. Tests the full handoff workflow.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Architect creates handoff Issue with Signal Schema design</li>
+            <li>Issue includes all required sections and labels</li>
+            <li>Builder receives and acknowledges handoff</li>
+            <li>Builder implements Signal Schema as WordPress custom post type</li>
+            <li>Builder creates PR with completion</li>
+            <li>PR includes handoff metadata and acknowledgment</li>
+            <li>Handoff workflow functions end-to-end</li>
+            <li>Documentation of workflow for future handoffs</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBSPRINT 6.4 -->
+    <div id="subsprint-6-4">
+      <div class="subsprint-header">
+        <div>
+          <div class="subsprint-title">Subsprint 6.4 — Cross-Agent Traceability & Provenance</div>
+          <div class="subsprint-gap">Closes: FW-03 (Traceability)</div>
+        </div>
+        <span class="phase-tag phase-normal">Wave 4</span>
+      </div>
+
+      <p>Establish git commit trailers and traceability infrastructure. Depends on 6.3 handoff automation. Enables attribution of all work to specific agents and towers.</p>
+
+      <div class="story-card">
+        <h4>S6.4.1 — Define git commit trailer standard</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect Tower Lead</span>
+          <span class="meta-tag">Points: 3</span>
+        </div>
+        <div class="story-desc">Define standard git commit trailers for agent attribution: Agent-Tower (which tower), Agent-Session (session ID for audit trail), Handoff-Ref (link to originating handoff issue). Enables traceability and provenance tracking.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Trailer standard documented in HANDOFF-PROTOCOL-v1.md update</li>
+            <li>Defines: Agent-Tower, Agent-Session, Handoff-Ref formats</li>
+            <li>Example commits shown with all trailers</li>
+            <li>Published to GitHub Wiki SOP</li>
+            <li>Used in test commits from 6.4.2</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.4.2 — Create .gitmessage template with trailer prompts</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Builder Tower Lead</span>
+          <span class="meta-tag">Points: 3</span>
+          <span class="meta-tag dep-tag">Depends: S6.4.1</span>
+        </div>
+        <div class="story-desc">Create <code>.gitmessage</code> template file with prompts for required trailers. When developers/agents commit, they're prompted to include Agent-Tower, Agent-Session, Handoff-Ref. Distributed to all repos.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>.gitmessage template created with trailer sections</li>
+            <li>Includes guided prompts for each trailer field</li>
+            <li>Added to all repos in framework/</li>
+            <li>Setup instructions documented in wiki</li>
+            <li>Tested with real commits from tower agents</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.4.3 — Create traceability query script</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Engineer Tower Lead</span>
+          <span class="meta-tag">Points: 5</span>
+          <span class="meta-tag dep-tag">Depends: S6.4.1, S6.4.2</span>
+        </div>
+        <div class="story-desc">Build script that parses git log for agent attribution trailers, aggregates by tower/agent/session, and generates provenance reports. Enables audit trails and accountability tracking.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Script created (Python/Bash) to parse git log trailers</li>
+            <li>Generates report showing: commit hash, author, tower, session, handoff ref</li>
+            <li>Can filter by: agent, tower, date range, session</li>
+            <li>Outputs JSON and human-readable formats</li>
+            <li>Tested against real commits from tower agents</li>
+            <li>Documented and published to control-plane/ directory</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.4.4 — Document traceability SOP in wiki</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect Tower Lead</span>
+          <span class="meta-tag">Points: 2</span>
+          <span class="meta-tag dep-tag">Depends: S6.4.1, S6.4.2, S6.4.3</span>
+        </div>
+        <div class="story-desc">Write comprehensive SOP in GitHub Wiki documenting: trailer standard, .gitmessage setup, how to query provenance, interpreting audit reports. Reference guide for teams running traceability queries.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>SOP published to GitHub Wiki</li>
+            <li>Includes: setup instructions, trailer definitions, query examples, report interpretation</li>
+            <li>Screenshots/examples of actual reports</li>
+            <li>Troubleshooting section</li>
+            <li>Links to trailer standard and query script</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBSPRINT 6.5 -->
+    <div id="subsprint-6-5">
+      <div class="subsprint-header">
+        <div>
+          <div class="subsprint-title">Subsprint 6.5 — Tower Activation — First Real Tasks</div>
+          <div class="subsprint-gap">Closes: SIG-01, INF-02 (Partial), OUT-01 (Partial)</div>
+        </div>
+        <span class="phase-tag phase-normal">Wave 5</span>
+      </div>
+
+      <p>Activate each of the 5 towers with one real, meaningful task to prove the framework works. Each tower delivers a concrete artifact. Depends on 6.1, 6.2, 6.3 (framework foundation).</p>
+
+      <div class="story-card">
+        <h4>S6.5.1 — Architect Tower: Design Signal Schema</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect</span>
+          <span class="meta-tag">Points: 8</span>
+          <span class="meta-tag dep-tag">Depends: S6.1.1, S6.2.1</span>
+        </div>
+        <div class="story-desc">Design formal Signal data model with 14+ fields: id, source, content, timestamp, domain, intent, confidence, tags, related_signals, media, metadata, version, status, created_by. Includes JSON Schema validation, examples, and design rationale. Closes SIG-01.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Signal Schema v1 documented in projects/the-markdown/signal-schema.md</li>
+            <li>14+ fields defined with types, constraints, descriptions</li>
+            <li>JSON Schema provided for validation</li>
+            <li>5+ real-world signal examples included</li>
+            <li>Design rationale explains each field's purpose</li>
+            <li>Identifies signal quality metrics (completeness, confidence)</li>
+            <li>Peer reviewed and approved by Builder/Engineer leads</li>
+            <li>Handoff created to Builder tower (S6.5.2)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.5.2 — Builder Tower: Implement Signal Schema as WordPress Custom Post Type</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Builder</span>
+          <span class="meta-tag">Points: 8</span>
+          <span class="meta-tag dep-tag">Depends: S6.5.1 (Architect handoff)</span>
+        </div>
+        <div class="story-desc">Implement Signal Schema as WordPress custom post type with metadata fields (ACF or native meta). Creates database structure and storage layer for signals in The Markdown WordPress instance. Completes SIG-01 implementation.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Custom post type 'signal' created in The Markdown theme/plugin</li>
+            <li>All 14+ schema fields mapped to post meta or ACF fields</li>
+            <li>JSON validation rules applied (per Signal Schema v1)</li>
+            <li>Admin UI includes all signal fields</li>
+            <li>REST API endpoint for signal CRUD operations</li>
+            <li>5+ test signals created and verified</li>
+            <li>Code merged to The Markdown repository</li>
+            <li>Handoff to Engineer for integration testing</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.5.3 — Engineer Tower: LLM Hosting Readiness Assessment</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Engineer</span>
+          <span class="meta-tag">Points: 6</span>
+          <span class="meta-tag dep-tag">Depends: S6.1.2, Sprint 5 K3s completion</span>
+        </div>
+        <div class="story-desc">Assess K3s cluster capacity for self-hosted LLM inference. Document hardware requirements (GPU, memory, storage), performance benchmarks, and deployment readiness. Closes INF-02 readiness portion. Output: readiness-assessment.md with clear go/no-go decision.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Assessment document created: projects/the-markdown/llm-readiness-assessment.md</li>
+            <li>Current cluster hardware specs documented</li>
+            <li>Performance benchmarks for target LLM models (Llama 2 7B, 13B, Mistral)</li>
+            <li>Memory/GPU/storage requirements calculated</li>
+            <li>Identifies any gaps or needed upgrades</li>
+            <li>Go/no-go decision for self-hosted LLM inference</li>
+            <li>Recommendations for scaling if needed</li>
+            <li>Shared with Engineer + Builder leads</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.5.4 — Editor Tower: Define Editorial Standards & Style Guide</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Editor</span>
+          <span class="meta-tag">Points: 6</span>
+          <span class="meta-tag dep-tag">Depends: S6.1.3</span>
+        </div>
+        <div class="story-desc">Create comprehensive editorial standards and style guide for The Markdown output layer. Covers tone, voice, grammar, formatting, citation, source attribution, fact-checking processes, and approval workflows. Foundation for content quality across the pipeline.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Editorial Standards doc created: projects/the-markdown/editorial-standards.md</li>
+            <li>Includes: brand voice, tone guidelines, grammar rules, formatting standards</li>
+            <li>Defines fact-checking process and source attribution requirements</li>
+            <li>Specifies approval workflows and reviewer responsibilities</li>
+            <li>Provides 10+ real editing examples (good & bad)</li>
+            <li>Covers accessibility standards (alt text, readability, etc.)</li>
+            <li>Defines quality metrics (accuracy, clarity, completeness)</li>
+            <li>Published and linked from editor-boot.md</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.5.5 — Creative Tower: Build Brand Kit v1</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Creative</span>
+          <span class="meta-tag">Points: 7</span>
+          <span class="meta-tag dep-tag">Depends: S6.1.4</span>
+        </div>
+        <div class="story-desc">Create comprehensive brand kit for The Markdown. Includes logo usage guidelines, color palette (primary, secondary, accent), typography (fonts, sizes, weights), visual language, imagery style, and design system patterns. Foundation for all creative output.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Brand Kit v1 created: projects/the-markdown/brand-kit-v1/</li>
+            <li>Logo files (SVG, PNG, variations) with usage guidelines</li>
+            <li>Color palette defined with hex/RGB values and use cases</li>
+            <li>Typography guide: font families, sizes, weights, line-height</li>
+            <li>Visual language: photography style, illustration style, icon system</li>
+            <li>Design patterns and component library (buttons, cards, etc.)</li>
+            <li>10+ real design examples following the kit</li>
+            <li>Accessible to creative tower agents via creative-boot.md reference</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBSPRINT 6.6 -->
+    <div id="subsprint-6-6">
+      <div class="subsprint-header">
+        <div>
+          <div class="subsprint-title">Subsprint 6.6 — Pipeline Demo — Signal → Meaning → Output</div>
+          <div class="subsprint-gap">Closes: SIG-02, MNG-04 (Partial), OUT-06</div>
+        </div>
+        <span class="phase-tag phase-normal">Wave 6</span>
+      </div>
+
+      <p>Demonstrate the complete Signal → Meaning → Output pipeline with one real signal. Depends on 6.5 tower activation. Proves the entire framework functions end-to-end.</p>
+
+      <div class="story-card">
+        <h4>S6.6.1 — End-to-End Pipeline Demo</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect + All Towers</span>
+          <span class="meta-tag">Points: 13</span>
+          <span class="meta-tag dep-tag">Depends: S6.5.1-5, S6.3.1-4</span>
+        </div>
+        <div class="story-desc">Execute a real signal through the complete pipeline: RSS ingestion → domain classification → intent tagging → draft content generation → editorial review → publish. One signal, all 5 towers, full artifact chain. Closes the loop on MVP.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Real RSS source ingested (TechCrunch, HackerNews, or industry-specific)</li>
+            <li>Signal created with all 14+ schema fields populated</li>
+            <li>Signal processed through intent classification (SIG-02)</li>
+            <li>Domain and intent tags assigned with confidence scores</li>
+            <li>Draft content generated based on signal + intent</li>
+            <li>Editor tower receives draft, applies editorial standards</li>
+            <li>Creative tower receives approved draft, applies branding</li>
+            <li>Final article published to The Markdown</li>
+            <li>Full artifact chain traced from signal → output via git commits</li>
+            <li>Documented walkthrough for future demo runs</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.6.2 — Intent Classification Prototype</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Builder + Engineer</span>
+          <span class="meta-tag">Points: 8</span>
+          <span class="meta-tag dep-tag">Depends: S6.5.1, S6.5.3</span>
+        </div>
+        <div class="story-desc">Build basic intent classification system for signals. Takes signal content and assigns domain (tech, business, health, etc.) and intent (news, analysis, tutorial, etc.) with confidence scores. Uses local LLM or simple classifier. Closes SIG-02, MNG-04 partial.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Classification service created (Python FastAPI or similar)</li>
+            <li>Defines domain taxonomy (8-10 domains)</li>
+            <li>Defines intent taxonomy (5-7 intents per domain)</li>
+            <li>Classifies test signals with 70%+ accuracy</li>
+            <li>Returns confidence scores with classifications</li>
+            <li>Integrated into Signal → Meaning pipeline</li>
+            <li>REST API endpoint for classification requests</li>
+            <li>Tested with 50+ real signals from RSS sources</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.6.3 — Fix /the-markdown-archive/ 404</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Builder</span>
+          <span class="meta-tag">Points: 2</span>
+        </div>
+        <div class="story-desc">Quick fix for broken public-facing URL /the-markdown-archive/ that returns 404. Closes OUT-06. Creates proper redirect or archive index page.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>/the-markdown-archive/ URL accessible (no 404)</li>
+            <li>Either: proper archive index page with searchable content, OR permanent redirect to archives</li>
+            <li>Tested from external browser</li>
+            <li>Documented in The Markdown README</li>
+            <li>Gap OUT-06 marked as closed</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBSPRINT 6.7 -->
+    <div id="subsprint-6-7">
+      <div class="subsprint-header">
+        <div>
+          <div class="subsprint-title">Subsprint 6.7 — BACKLOG</div>
+          <div class="subsprint-gap">Parallel: Waves 5-6</div>
+        </div>
+        <span class="phase-tag phase-backlog">Backlog Phase</span>
+      </div>
+
+      <p>Address lower-priority gap register items and carry-forward work from Sprint 5. Parallel with 6.5-6.6. May spill to Sprint 7 if priorities shift.</p>
+
+      <div class="story-card">
+        <h4>S6.7.1 — Domain Weighting Engine</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Engineer</span>
+          <span class="meta-tag">Points: 5</span>
+        </div>
+        <div class="story-desc">Move hardcoded multipliers in intent classification to configurable settings. Enables A/B testing and domain-specific tuning without code changes. Closes MNG-01.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Configuration file created for domain weights</li>
+            <li>All hardcoded multipliers extracted to config</li>
+            <li>Hot-reload support (can change weights without restart)</li>
+            <li>API endpoint to list/update weights</li>
+            <li>Tested with multiple weight sets</li>
+            <li>Documented in engineer-boot.md</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.7.2 — Manual Signal Input</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Builder</span>
+          <span class="meta-tag">Points: 5</span>
+        </div>
+        <div class="story-desc">Create basic UI for human-submitted signals (non-RSS sources). Allows manual signal creation through web form. Addresses SIG-04 gap.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Web form created in The Markdown WordPress</li>
+            <li>Form fields match Signal Schema v1</li>
+            <li>Submitter can include title, content, source, domain, intent</li>
+            <li>Signals created via form appear in signal post type</li>
+            <li>Basic validation (required fields, content length limits)</li>
+            <li>Tested with manual submissions from team</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.7.3 — Content Lab Scoping</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect + Editor</span>
+          <span class="meta-tag">Points: 5</span>
+        </div>
+        <div class="story-desc">Architecture design for Content Lab — orchestration workspace where editors can experiment with signals, remixing, and output variants. Scoping only; implementation in Sprint 7+. Addresses OUT-01 scoping.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Content Lab architecture document created</li>
+            <li>Defines workspace concept, user stories, feature set</li>
+            <li>Identifies tech stack options (WordPress plugin, separate app, etc.)</li>
+            <li>Scopes the effort for Sprint 7+ implementation</li>
+            <li>Identifies dependencies (Signal Schema, Intent Classification, Brand Kit)</li>
+            <li>Approved by Editor + Architect leads</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.7.4 — Carry-Forward Items from Sprint 5 Retrospective</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect</span>
+          <span class="meta-tag">Points: TBD</span>
+        </div>
+        <div class="story-desc">Address any carry-forward items from Sprint 5 retrospective. Only if no critical blockers. Priority lower than main sprint stories.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Retrospective items identified after Sprint 5 completion</li>
+            <li>Prioritized by impact/effort ratio</li>
+            <li>Completed within available capacity</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBSPRINT 6.8 -->
+    <div id="subsprint-6-8">
+      <div class="subsprint-header">
+        <div>
+          <div class="subsprint-title">Subsprint 6.8 — OVERWATCH</div>
+          <div class="subsprint-gap">Security & Compliance Phase</div>
+        </div>
+        <span class="phase-tag phase-overwatch">Overwatch Phase</span>
+      </div>
+
+      <p>Security, data protection, and MITRE ATT&CK assessment for the Agentics layer. Parallel with 6.5-6.6. Depends on 6.3, 6.5 for security review scope.</p>
+
+      <div class="story-card">
+        <h4>S6.8.1 — MITRE ATT&CK Assessment for Agentics Layer</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect + Engineer</span>
+          <span class="meta-tag">Points: 8</span>
+        </div>
+        <div class="story-desc">Map Agentics operating system against MITRE ATT&CK techniques. Focus on top 10 agent-specific techniques: prompt injection (T1059.xxx), data exfiltration via handoff, unauthorized agent actions, session hijacking, agent privilege escalation, LLM jailbreaking. Assess mitigations for each.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>MITRE ATT&CK assessment document created</li>
+            <li>Identifies 10+ techniques applicable to agent framework</li>
+            <li>Includes: Technique ID, description, agent-specific risk, current mitigation, gaps</li>
+            <li>Prioritizes by likelihood × impact</li>
+            <li>Recommends mitigations for gaps</li>
+            <li>Linked to Agentics architecture doc</li>
+            <li>Published to wiki for team awareness</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.8.2 — Agent Data Protection Policy</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect</span>
+          <span class="meta-tag">Points: 6</span>
+        </div>
+        <div class="story-desc">Define what data agents can access, store, and transmit. PII handling rules, API key management for agent sessions, data retention policies, and access controls. Closes data governance gap.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Data Protection Policy document created</li>
+            <li>Defines data classification (public, internal, confidential, PII)</li>
+            <li>Specifies agent access rights per data class</li>
+            <li>PII handling rules (no PII in handoffs, logs, etc.)</li>
+            <li>API key management procedures (rotation, storage, access)</li>
+            <li>Data retention and deletion policies</li>
+            <li>Audit logging requirements</li>
+            <li>Consequences for policy violations</li>
+            <li>Published to wiki and referenced in boot contexts</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.8.3 — Handoff Package Security Review</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Engineer</span>
+          <span class="meta-tag">Points: 4</span>
+          <span class="meta-tag dep-tag">Depends: S6.3.1, S6.3.2, S6.3.4</span>
+        </div>
+        <div class="story-desc">Review handoff protocol and packages to ensure no secrets, credentials, or sensitive data leak through GitHub Issues (which are public). Audit handoff templates and create detection rules.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Security review of handoff templates completed</li>
+            <li>Identifies fields that could accidentally expose secrets</li>
+            <li>Creates detection rules (regex patterns for API keys, passwords)</li>
+            <li>Documents forbidden content in handoff packages</li>
+            <li>Adds warning/validation to Issue template</li>
+            <li>GitHub Actions workflow to scan Issues for secrets (optional)</li>
+            <li>Documented in Data Protection Policy</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.8.4 — Backup Procedures for Agentics Artifacts</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Engineer</span>
+          <span class="meta-tag">Points: 4</span>
+        </div>
+        <div class="story-desc">Define and implement backup procedures for critical Agentics artifacts: boot contexts, agent templates, gap register, control plane data. All versioned in Git with automated backup to secondary storage.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Backup procedures document created</li>
+            <li>Identifies critical artifacts: boot contexts, templates, gap register</li>
+            <li>Primary backup: Git (versioned, distributed)</li>
+            <li>Secondary backup: S3/cloud storage with daily snapshots</li>
+            <li>Recovery procedures documented</li>
+            <li>Tested recovery from backup</li>
+            <li>Retention policy (keep 30 days of snapshots)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.8.5 — WordPress Security Audit</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Engineer</span>
+          <span class="meta-tag">Points: 5</span>
+        </div>
+        <div class="story-desc">Security audit of The Markdown WordPress instance: plugin vulnerabilities, access controls, wp-admin security, database hardening. Addresses INF-08 partially.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>WordPress audit completed</li>
+            <li>Checks: plugin versions, known CVEs, outdated themes</li>
+            <li>Verifies: user permissions, role-based access, wp-admin protection</li>
+            <li>Reviews: database credentials, API keys, secrets storage</li>
+            <li>Audit report with findings and remediation plan</li>
+            <li>Critical vulnerabilities patched immediately</li>
+            <li>Report shared with Builder + Editor leads</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBSPRINT 6.9 -->
+    <div id="subsprint-6-9">
+      <div class="subsprint-header">
+        <div>
+          <div class="subsprint-title">Subsprint 6.9 — OPERATIONS</div>
+          <div class="subsprint-gap">Final: Wave 9</div>
+        </div>
+        <span class="phase-tag phase-ops">Operations Phase</span>
+      </div>
+
+      <p>Control plane dashboard, wiki SOPs, QA, live demo, retrospective. Closes the sprint with validated, documented, repeatable operations. Depends on all prior subsprints.</p>
+
+      <div class="story-card">
+        <h4>S6.9.1 — Control Plane Dashboard v1</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Engineer + Builder</span>
+          <span class="meta-tag">Points: 8</span>
+          <span class="meta-tag dep-tag">Depends: All 6.1-6.8</span>
+        </div>
+        <div class="story-desc">Create HTML dashboard showing: active agents, current assignments, recent handoffs, gap register status. Provides visibility into Agentics workload. Closes FW-06.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Dashboard created: control-plane/dashboard.html</li>
+            <li>Shows: list of 5 active agents, their current status</li>
+            <li>Displays recent handoffs (last 10 Issues/PRs)</li>
+            <li>Gap Register summary: total gaps, closed, in-progress, blocked</li>
+            <li>Real-time data pulled from GitHub API</li>
+            <li>Deployed to control-plane/ directory</li>
+            <li>Accessible to team via GitHub Pages or internal URL</li>
+            <li>Styled per Agentics design system</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.9.2 — Write Wiki SOPs</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect</span>
+          <span class="meta-tag">Points: 8</span>
+          <span class="meta-tag dep-tag">Depends: 6.1-6.8</span>
+        </div>
+        <div class="story-desc">Write comprehensive wiki SOPs for daily operations: Agent Onboarding, Handoff Protocol Usage, Boot Context Loading, Tower Activation Checklist, Content Pipeline Operations. Reference guides for team execution.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>5 wiki SOPs published to GitHub Wiki:</li>
+            <li>1. Agent Onboarding (steps to bring new agent online)</li>
+            <li>2. Handoff Protocol Usage (how to create/receive handoffs)</li>
+            <li>3. Boot Context Loading (how agents load their boot context)</li>
+            <li>4. Tower Activation Checklist (validate tower is operational)</li>
+            <li>5. Content Pipeline Operations (run Signal → Output pipeline)</li>
+            <li>Each SOP includes: overview, prerequisites, step-by-step instructions, troubleshooting</li>
+            <li>Screenshots/examples where helpful</li>
+            <li>Links from wiki Home page</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.9.3 — QA Validation</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect + All Towers</span>
+          <span class="meta-tag">Points: 8</span>
+          <span class="meta-tag dep-tag">Depends: 6.1-6.8</span>
+        </div>
+        <div class="story-desc">Execute comprehensive QA validation: verify all 5 boot contexts load cleanly, handoff templates work end-to-end, traceability queries return valid data, all agents operational, pipeline processes signals correctly.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Boot Context QA: Load all 5 boot contexts, verify no errors</li>
+            <li>Handoff QA: Create 5 handoffs (one per tower), verify delivery and artifact transfer</li>
+            <li>Traceability QA: Query git log, generate provenance report, verify accuracy</li>
+            <li>Agent QA: Verify all 5 agents accessible and responding</li>
+            <li>Pipeline QA: Process 3 test signals end-to-end, verify output quality</li>
+            <li>QA Report: document all pass/fail results</li>
+            <li>Block any critical failures from Sprint demo</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.9.4 — Live Demo</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect + All Towers</span>
+          <span class="meta-tag">Points: 5</span>
+          <span class="meta-tag dep-tag">Depends: S6.9.3 QA passing</span>
+        </div>
+        <div class="story-desc">Execute full live walkthrough of Agentics system: boot an agent from boot context, assign a real task via handoff, produce artifact, handoff to next tower, verify traceability. Demonstrate that all framework pieces work together.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Demo scenario: Signal ingestion → Intent classification → Draft content → Editorial review → Publication</li>
+            <li>Demo script written and rehearsed</li>
+            <li>Live walkthrough executed with minimal editing</li>
+            <li>All 5 towers demonstrated in action</li>
+            <li>Traceability visible (git commits, handoff chain)</li>
+            <li>Demo recorded or documented for future reference</li>
+            <li>Presented to stakeholders (Justin, project sponsors)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.9.5 — Sprint 6 Retrospective</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect</span>
+          <span class="meta-tag">Points: 5</span>
+          <span class="meta-tag dep-tag">Depends: All 6.1-6.9</span>
+        </div>
+        <div class="story-desc">Create docs/sprint-6-retrospective.html documenting: what was shipped, gaps closed (target: 10 of 25), what was deferred, lessons learned, recommendations for Sprint 7. Complete view of Sprint 6 outcomes.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>docs/sprint-6-retrospective.html created</li>
+            <li>Sections: Overview, Shipped Stories, Gaps Closed, Deferred Work, Lessons Learned, Sprint 7 Recommendations</li>
+            <li>List all 35 stories with completion status</li>
+            <li>Gap Register updated: mark 10 gaps as closed</li>
+            <li>Metrics: velocity, cycle time, quality issues, tech debt</li>
+            <li>Team retrospective feedback incorporated</li>
+            <li>Lessons documented for future sprint planning</li>
+            <li>Published and shared with team</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.9.6 — Hotfix Window</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: All Towers</span>
+          <span class="meta-tag">Points: 5</span>
+        </div>
+        <div class="story-desc">Reserved capacity for critical issues discovered during QA and demo. Critical bugs fixed, blockers resolved, last-minute improvements made before sprint close.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Critical bugs identified during QA fixed immediately</li>
+            <li>Blockers preventing demo removed</li>
+            <li>Documentation corrections if needed</li>
+            <li>No new features — only critical fixes</li>
+            <li>All fixes merged and tested before retrospective</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h4>S6.9.7 — Sprint 7 Planning Inputs</h4>
+        <div class="story-meta">
+          <span class="meta-tag">Owner: Architect</span>
+          <span class="meta-tag">Points: 3</span>
+          <span class="meta-tag dep-tag">Depends: S6.9.5 retrospective</span>
+        </div>
+        <div class="story-desc">Document next priority gaps and dependencies for Sprint 7 planning. Identify which of the remaining 15 gaps to target, any technical debt from Sprint 6, and resource/skill gaps to address.</div>
+        <div class="story-acceptance">
+          <h5>Acceptance Criteria</h5>
+          <ul>
+            <li>Sprint 7 planning inputs document created</li>
+            <li>Top 10 gaps ranked by priority (impact × effort)</li>
+            <li>Dependencies identified between gaps</li>
+            <li>Technical debt items listed</li>
+            <li>Resource requirements estimated</li>
+            <li>Shared with team for Sprint 7 planning session</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="gap-impact">Gap Register Impact</h2>
+
+    <p>Sprint 6 targets 10 of 25 gaps in the gap register. The following table shows which subsprints address each gap:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Gap ID</th>
+          <th>Gap Title</th>
+          <th>Category</th>
+          <th>Sprint 6 Subsprint</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>FW-01</td>
+          <td>Handoff Protocol Automation</td>
+          <td>Framework</td>
+          <td>6.3</td>
+          <td>Targeted</td>
+        </tr>
+        <tr>
+          <td>FW-02</td>
+          <td>Agent Boot Contexts</td>
+          <td>Framework</td>
+          <td>6.1</td>
+          <td>Targeted</td>
+        </tr>
+        <tr>
+          <td>FW-03</td>
+          <td>Cross-Agent Traceability</td>
+          <td>Framework</td>
+          <td>6.4</td>
+          <td>Targeted</td>
+        </tr>
+        <tr>
+          <td>FW-04</td>
+          <td>Agent Role Registry</td>
+          <td>Framework</td>
+          <td>6.2</td>
+          <td>Targeted</td>
+        </tr>
+        <tr>
+          <td>FW-05</td>
+          <td>Agent Templates (Editor, Creative)</td>
+          <td>Framework</td>
+          <td>6.2</td>
+          <td>Targeted</td>
+        </tr>
+        <tr>
+          <td>FW-06</td>
+          <td>Control Plane Workload Visibility</td>
+          <td>Framework</td>
+          <td>6.9</td>
+          <td>Targeted</td>
+        </tr>
+        <tr>
+          <td>SIG-01</td>
+          <td>Signal Schema Design & Implementation</td>
+          <td>Signal</td>
+          <td>6.5</td>
+          <td>Targeted</td>
+        </tr>
+        <tr>
+          <td>SIG-02</td>
+          <td>Intent Classification Prototype</td>
+          <td>Signal</td>
+          <td>6.6</td>
+          <td>Targeted</td>
+        </tr>
+        <tr>
+          <td>MNG-04</td>
+          <td>Intent Agent Development (Partial)</td>
+          <td>Meaning</td>
+          <td>6.6</td>
+          <td>Targeted (Partial)</td>
+        </tr>
+        <tr>
+          <td>OUT-06</td>
+          <td>Fix Archive 404 Error</td>
+          <td>Output</td>
+          <td>6.6</td>
+          <td>Targeted</td>
+        </tr>
+        <tr>
+          <td>MNG-01</td>
+          <td>Domain Weighting Configuration</td>
+          <td>Meaning</td>
+          <td>6.7</td>
+          <td>Backlog</td>
+        </tr>
+        <tr>
+          <td>SIG-04</td>
+          <td>Manual Signal Input UI</td>
+          <td>Signal</td>
+          <td>6.7</td>
+          <td>Backlog</td>
+        </tr>
+        <tr>
+          <td>OUT-01</td>
+          <td>Content Lab Architecture (Scoping)</td>
+          <td>Output</td>
+          <td>6.7</td>
+          <td>Backlog</td>
+        </tr>
+        <tr>
+          <td>INF-02</td>
+          <td>LLM Readiness Assessment</td>
+          <td>Infrastructure</td>
+          <td>6.5</td>
+          <td>Targeted</td>
+        </tr>
+        <tr>
+          <td>INF-08</td>
+          <td>WordPress Security (Partial)</td>
+          <td>Infrastructure</td>
+          <td>6.8</td>
+          <td>Targeted (Partial)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><strong>Target:</strong> 10 of 25 gaps closed by end of Sprint 6. Remaining 15 gaps deferred to Sprint 7+ planning.</p>
+
+    <h2 id="execution-waves">Execution Waves</h2>
+
+    <p>Sprint 6 execution flows through 9 waves, with dependencies shown:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Wave</th>
+          <th>Subsprint(s)</th>
+          <th>Focus</th>
+          <th>Dependencies</th>
+          <th>Duration</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Wave 1</td>
+          <td>6.1</td>
+          <td>Boot Context Packages (all 5 towers)</td>
+          <td>None</td>
+          <td>3-4 days</td>
+        </tr>
+        <tr>
+          <td>Wave 2</td>
+          <td>6.2</td>
+          <td>Agent Role Registry & Templates</td>
+          <td>None (parallel with 6.1)</td>
+          <td>3-4 days</td>
+        </tr>
+        <tr>
+          <td>Wave 3</td>
+          <td>6.3</td>
+          <td>Handoff Protocol Automation</td>
+          <td>Sprint 5 (S5.7.2)</td>
+          <td>4-5 days</td>
+        </tr>
+        <tr>
+          <td>Wave 4</td>
+          <td>6.4</td>
+          <td>Cross-Agent Traceability</td>
+          <td>6.3</td>
+          <td>3-4 days</td>
+        </tr>
+        <tr>
+          <td>Wave 5</td>
+          <td>6.5</td>
+          <td>Tower Activation (5 parallel stories)</td>
+          <td>6.1, 6.2, 6.3</td>
+          <td>5-6 days</td>
+        </tr>
+        <tr>
+          <td>Wave 6</td>
+          <td>6.6</td>
+          <td>Pipeline Demo & Intent Classification</td>
+          <td>6.5</td>
+          <td>4-5 days</td>
+        </tr>
+        <tr>
+          <td>Wave 7</td>
+          <td>6.7</td>
+          <td>Backlog & Carry-Forward</td>
+          <td>None (parallel with 5-6)</td>
+          <td>2-3 days</td>
+        </tr>
+        <tr>
+          <td>Wave 8</td>
+          <td>6.8</td>
+          <td>OVERWATCH Security & Compliance</td>
+          <td>6.3, 6.5</td>
+          <td>4-5 days</td>
+        </tr>
+        <tr>
+          <td>Wave 9</td>
+          <td>6.9</td>
+          <td>OPERATIONS Dashboard, SOPs, QA, Demo, Retro</td>
+          <td>All 6.1-6.8</td>
+          <td>4-5 days</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><strong>Total Duration:</strong> 2 weeks. Waves 1-2 run in parallel (Days 1-4), Wave 3 starts after Wave 2 (Days 5-9), remaining waves follow sequentially with Waves 7-8 overlapping.</p>
+
+    <h2 id="risk-register">Risk Register</h2>
+
+    <p>Six identified risks that could impact Sprint 6 execution:</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4><span class="risk-high">●</span> Sprint 5 Infrastructure Not Ready</h4>
+        <p><strong>Impact:</strong> High — Blocks Engineer tower activation and any infrastructure-related testing</p>
+        <p><strong>Likelihood:</strong> Medium — Depends on Sprint 5 timeline adherence</p>
+        <p><strong>Mitigation:</strong> Weekly sync with Sprint 5 team; identify delays early. Prepare Engineer tower work offline if needed. Prioritize K3s cluster completion.</p>
+      </div>
+
+      <div class="card">
+        <h4><span class="risk-high">●</span> Agent Boot Contexts Insufficient for Cold Start</h4>
+        <p><strong>Impact:</strong> High — Agents cannot operate if boot context incomplete</p>
+        <p><strong>Likelihood:</strong> High — First time building comprehensive boot contexts</p>
+        <p><strong>Mitigation:</strong> Use boot-context-template.md as standard. Peer review all 5 contexts. Test each context with real agent load before Wave 5. Iterate based on feedback.</p>
+      </div>
+
+      <div class="card">
+        <h4><span class="risk-medium">●</span> Handoff Protocol Too Heavy for Simple Tasks</h4>
+        <p><strong>Impact:</strong> Medium — Agents may avoid using protocol due to friction</p>
+        <p><strong>Likelihood:</strong> Medium — Early design may not match real usage patterns</p>
+        <p><strong>Mitigation:</strong> Create light + heavy handoff variants. Test with S6.3.4. Gather feedback from agents. Simplify if needed in Sprint 6.9 hotfix window.</p>
+      </div>
+
+      <div class="card">
+        <h4><span class="risk-low">●</span> WordPress Access Issues Block Builder/Editor Work</h4>
+        <p><strong>Impact:</strong> Medium — Delays Signal Schema implementation and editorial tooling</p>
+        <p><strong>Likelihood:</strong> Low — WordPress instance from Sprint 5 should be stable</p>
+        <p><strong>Mitigation:</strong> Early access verification (S6.5.1). Staging environment as backup. Coordinate with Engineer tower for access restoration if needed.</p>
+      </div>
+
+      <div class="card">
+        <h4><span class="risk-medium">●</span> MITRE ATT&CK Scope Too Broad for Single Sprint</h4>
+        <p><strong>Impact:</strong> Medium — May not complete comprehensive assessment</p>
+        <p><strong>Likelihood:</strong> High — Security assessment can expand infinitely</p>
+        <p><strong>Mitigation:</strong> Scope to top 10 techniques only (S6.8.1). Use risk-based prioritization. Defer comprehensive assessment to Sprint 7 if needed. Focus on prompt injection and data exfiltration as must-haves.</p>
+      </div>
+
+      <div class="card">
+        <h4><span class="risk-high">●</span> Pipeline Demo Fails (Too Many Dependencies for MVP)</h4>
+        <p><strong>Impact:</strong> High — Cannot demonstrate framework works end-to-end</p>
+        <p><strong>Likelihood:</strong> Medium — Many moving parts in S6.6.1</p>
+        <p><strong>Mitigation:</strong> Build demo incrementally (S6.5.1→5.2→5.3→6.6). Unit test each component. Have fallback demo (manual walkthrough with pre-recorded signals). QA (S6.9.3) identifies issues early.</p>
+      </div>
+    </div>
+
+    <h2 id="acceptance-criteria">Sprint Acceptance Criteria</h2>
+
+    <p>Sprint 6 is considered successful if ALL of the following criteria are met by sprint end:</p>
+
+    <table class="acceptance-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Acceptance Criterion</th>
+          <th>Verification Method</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>All 5 boot context packages exist and load cleanly without errors</td>
+          <td>Load each boot context file in agent environment; no syntax/missing reference errors</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Agent Role Registry published to GitHub Wiki with all 5 active agents listed</td>
+          <td>Wiki page accessible, all agents searchable, linked from home page</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>GitHub Issue/PR handoff templates installed on all repos with working auto-population</td>
+          <td>Create new Issue/PR, verify template sections appear and autofill works</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Cross-agent traceability produces valid provenance report with agent/tower/session attribution</td>
+          <td>Run traceability script on test commits; verify report accuracy</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Architect Tower produces Signal Schema v1 with 14+ fields and JSON Schema validation</td>
+          <td>Validate schema against 50+ test signals; review design document</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Builder Tower implements Signal Schema as WordPress custom post type with full CRUD</td>
+          <td>Create/read/update/delete test signals via WordPress admin; verify REST API</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>Engineer Tower delivers LLM Readiness Assessment with clear go/no-go decision</td>
+          <td>Review assessment; verify hardware specs, benchmarks, and recommendations</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>Editor Tower delivers comprehensive Editorial Standards & Style Guide</td>
+          <td>Review document; verify all sections present and applied to real content</td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td>Creative Tower delivers Brand Kit v1 with logo, colors, typography, and design patterns</td>
+          <td>Review kit files; apply brand standards to test designs</td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td>One real signal processed through complete Signal → Meaning → Output pipeline</td>
+          <td>Execute S6.6.1 demo; verify signal → classification → draft → edit → publish</td>
+        </tr>
+        <tr>
+          <td>11</td>
+          <td>MITRE ATT&CK assessment complete for Agentics layer (top 10 techniques)</td>
+          <td>Review assessment document; verify technique mapping and mitigations</td>
+        </tr>
+        <tr>
+          <td>12</td>
+          <td>Agent Data Protection Policy documented with PII/API key/access rules</td>
+          <td>Review policy document; verify coverage of all data types and agent roles</td>
+        </tr>
+        <tr>
+          <td>13</td>
+          <td>Control Plane Dashboard v1 deployed showing active agents, handoffs, gap register</td>
+          <td>Access dashboard URL; verify data accuracy and real-time updates</td>
+        </tr>
+        <tr>
+          <td>14</td>
+          <td>All wiki SOPs published (Onboarding, Handoff Protocol, Boot Context, Tower Activation, Pipeline Operations)</td>
+          <td>Access wiki; verify all SOPs readable and linked from home page</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout warning">
+      <strong>Critical Success Threshold:</strong> 13 of 14 criteria must be met. One failure acceptable only if documented in retrospective and deferred to Sprint 7 with clear resolution plan.
+    </div>
+
+    <footer>
+      <p>The Foreman's Build Stack — Yeti Knowledge Systems</p>
+      <p>
+        <a href="../sprint-5-plan.html">← Sprint 5 Plan</a> ·
+        <a href="../../projects/the-markdown/gap-register.md">Gap Register</a> ·
+        <a href="https://github.com/yeti-ks/the-foremans-build-stack">GitHub</a> ·
+        March 2026
+      </p>
+      <p style="font-size: 12px; margin-top: 16px; color: var(--text-muted);">
+        Sprint 6 Plan · Epic 6: Distributed AI Agent Framework & Content Pipeline · 2-week execution
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
