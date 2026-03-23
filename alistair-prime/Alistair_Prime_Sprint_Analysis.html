@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alistair Prime — Sprint Implementation Analysis | Foreman</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0d1117; --surface: #161b22; --border: #30363d;
+      --text: #e6edf3; --text-muted: #8b949e;
+      --accent: #58a6ff; --green: #3fb950; --red: #f85149;
+      --yellow: #d29922; --orange: #db6d28; --purple: #bc8cff; --cyan: #39d2c0;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+    header { margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 30px; }
+    .badge { display: inline-block; background: rgba(88,166,255,0.15); color: var(--accent); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 12px; border: 1px solid rgba(88,166,255,0.3); }
+    .badge.warn { background: rgba(210,153,34,0.15); color: var(--yellow); border-color: rgba(210,153,34,0.3); }
+    .badge.danger { background: rgba(248,81,73,0.15); color: var(--red); border-color: rgba(248,81,73,0.3); }
+    .badge.ok { background: rgba(63,185,80,0.15); color: var(--green); border-color: rgba(63,185,80,0.3); }
+    h1 { font-size: 2.2em; margin: 16px 0; font-weight: 700; }
+    h2 { font-size: 1.6em; margin: 32px 0 16px 0; font-weight: 700; color: var(--accent); border-bottom: 2px solid var(--border); padding-bottom: 12px; }
+    h3 { font-size: 1.2em; margin: 24px 0 12px 0; font-weight: 600; color: var(--text); }
+    h4 { font-size: 1.05em; margin: 16px 0 8px 0; font-weight: 600; color: var(--cyan); }
+    p { margin: 12px 0; }
+    ul, ol { margin: 12px 0 12px 24px; }
+    li { margin: 6px 0; }
+    .meta { display: flex; gap: 24px; margin-top: 16px; font-size: 14px; color: var(--text-muted); flex-wrap: wrap; }
+    .meta-item { display: flex; align-items: center; gap: 6px; }
+
+    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin: 24px 0; }
+    .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 20px; text-align: center; }
+    .metric-value { font-size: 1.8em; font-weight: 700; color: var(--accent); margin: 8px 0; }
+    .metric-value.green { color: var(--green); }
+    .metric-value.yellow { color: var(--yellow); }
+    .metric-value.red { color: var(--red); }
+    .metric-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+
+    .callout { background: rgba(88,166,255,0.1); border-left: 4px solid var(--accent); padding: 16px; margin: 20px 0; border-radius: 4px; }
+    .callout.goal { background: rgba(63,185,80,0.1); border-left-color: var(--green); }
+    .callout.warning { background: rgba(248,81,73,0.1); border-left-color: var(--red); }
+    .callout.info { background: rgba(188,140,255,0.1); border-left-color: var(--purple); }
+
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    thead { background: rgba(88,166,255,0.1); }
+    th { padding: 12px; text-align: left; font-weight: 600; border-bottom: 1px solid var(--border); color: var(--accent); font-size: 13px; }
+    td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+    tr:last-child td { border-bottom: none; }
+
+    .status-complete { color: var(--green); font-weight: 600; }
+    .status-partial { color: var(--yellow); font-weight: 600; }
+    .status-missing { color: var(--red); font-weight: 600; }
+    .status-planned { color: var(--text-muted); font-weight: 600; }
+
+    .sprint-block { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin: 20px 0; }
+    .sprint-title { font-size: 1.1em; font-weight: 700; color: var(--accent); margin-bottom: 12px; }
+
+    .arch-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin: 20px 0; font-family: 'Courier New', monospace; font-size: 13px; white-space: pre; overflow-x: auto; line-height: 1.4; color: var(--text-muted); }
+    .arch-diagram .layer-done { color: var(--green); }
+    .arch-diagram .layer-wip { color: var(--yellow); }
+    .arch-diagram .layer-future { color: var(--text-muted); }
+    .arch-diagram .highlight { color: var(--accent); }
+
+    .dep-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    .dep-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
+    .dep-card h4 { margin-top: 0; }
+
+    .footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-muted); }
+
+    @media (max-width: 768px) {
+      .dep-grid { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="badge">Foreman — Architecture Analysis</span>
+      <h1>Alistair Prime — Sprint Implementation Analysis</h1>
+      <div class="meta">
+        <div class="meta-item"><strong>Date:</strong>&nbsp;2026-03-23</div>
+        <div class="meta-item"><strong>Requested by:</strong>&nbsp;Yeti (Architect Brief)</div>
+        <div class="meta-item"><strong>Source of Truth:</strong>&nbsp;CURRENT_STATE.md + Architect Brief</div>
+        <div class="meta-item"><strong>Classification:</strong>&nbsp;Sprint Planning — Pre-Design</div>
+      </div>
+    </header>
+
+    <!-- ==================== SECTION 0: EXECUTIVE SUMMARY ==================== -->
+    <h2>Executive Summary</h2>
+
+    <p>Alistair Prime is a <strong>Cognitive Runtime</strong> — the execution half of a split architecture where Alistair (ChatGPT) reasons and Prime acts. Four of five layers are complete. The Interface Layer is in progress. The runtime boots, persists memory via SQLite, and accepts CLI input through a primitive scaffold path. The brief requests four supporting architecture documents and frames the next integration target as Robo Stack.</p>
+
+    <div class="callout warning">
+      <strong>BLOCKER: Implementation Repo Inaccessible.</strong> The <code>LittleYeti-Dev/alistars-stack</code> repo requires authentication. I successfully cloned <code>the-foremans-build-stack</code> (public) and read <code>CURRENT_STATE.md</code>, but cannot inspect actual source code (main.py, engine.py, sqlite_store.py, cli.py). All analysis below is derived from the handoff doc + architect brief. <strong>Sprint story-level estimates will need validation against the actual codebase.</strong>
+    </div>
+
+    <div class="callout goal">
+      <strong>CLI Connectivity Check:</strong><br>
+      &bull; <code>the-foremans-build-stack</code> — <span class="status-complete">CONNECTED</span> (cloned, CURRENT_STATE.md read successfully)<br>
+      &bull; <code>alistars-stack</code> — <span class="status-missing">AUTH REQUIRED</span> (private repo, needs PAT or SSH key)<br>
+      &bull; <code>robo-stack</code> — <span class="status-planned">NOT TESTED</span> (not attempted — will need access for integration planning)
+    </div>
+
+    <div class="metrics">
+      <div class="metric-card">
+        <div class="metric-label">Layers Complete</div>
+        <div class="metric-value green">4/5</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">In Progress</div>
+        <div class="metric-value yellow">1</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Docs Requested</div>
+        <div class="metric-value">4</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Sprint Tracks</div>
+        <div class="metric-value">3</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Estimated Stories</div>
+        <div class="metric-value">18</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Risk Level</div>
+        <div class="metric-value yellow">MEDIUM</div>
+      </div>
+    </div>
+
+    <!-- ==================== SECTION 1: AS-BUILT STATE ==================== -->
+    <h2>1. As-Built State Assessment</h2>
+
+    <div class="arch-diagram">
+<span class="highlight">ALISTAIR PRIME — RUNTIME ARCHITECTURE (AS-BUILT)</span>
+
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│  <span class="layer-future">┌─────────────────────────────────────────────────────┐</span>  │
+│  <span class="layer-future">│  NLP LAYER (FUTURE)                                 │</span>  │
+│  <span class="layer-future">│  Natural language → structured tasks                 │</span>  │
+│  <span class="layer-future">│  STATUS: NOT STARTED — Intentionally deferred        │</span>  │
+│  <span class="layer-future">└─────────────────────────────────────────────────────┘</span>  │
+│                          ↓                                  │
+│  <span class="layer-wip">┌─────────────────────────────────────────────────────┐</span>  │
+│  <span class="layer-wip">│  INTERFACE LAYER (IN PROGRESS)                      │</span>  │
+│  <span class="layer-wip">│  cli.py — basic input/output exists                 │</span>  │
+│  <span class="layer-wip">│  MISSING: command language, status, memory inspect   │</span>  │
+│  <span class="layer-wip">└─────────────────────────────────────────────────────┘</span>  │
+│                          ↓                                  │
+│  <span class="layer-done">┌─────────────────────────────────────────────────────┐</span>  │
+│  <span class="layer-done">│  ORCHESTRATION LAYER ✓                              │</span>  │
+│  <span class="layer-done">│  engine.py — scaffold behavior (primitive routing)   │</span>  │
+│  <span class="layer-done">└─────────────────────────────────────────────────────┘</span>  │
+│                          ↓                                  │
+│  <span class="layer-done">┌─────────────────────────────────────────────────────┐</span>  │
+│  <span class="layer-done">│  MEMORY LAYER ✓                                     │</span>  │
+│  <span class="layer-done">│  sqlite_store.py — persistent event storage          │</span>  │
+│  <span class="layer-done">└─────────────────────────────────────────────────────┘</span>  │
+│                          ↓                                  │
+│  <span class="layer-done">┌─────────────────────────────────────────────────────┐</span>  │
+│  <span class="layer-done">│  CORE LAYER ✓                                       │</span>  │
+│  <span class="layer-done">│  Config, structured logging, runtime primitives      │</span>  │
+│  <span class="layer-done">└─────────────────────────────────────────────────────┘</span>  │
+│                          ↓                                  │
+│  <span class="layer-done">┌─────────────────────────────────────────────────────┐</span>  │
+│  <span class="layer-done">│  FOUNDATION LAYER ✓                                 │</span>  │
+│  <span class="layer-done">│  Boot, runtime lifecycle, base dependencies         │</span>  │
+│  <span class="layer-done">└─────────────────────────────────────────────────────┘</span>  │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+<span class="highlight">RUNTIME PATH:</span>  input → interface → engine → memory → output
+<span class="highlight">PERSISTENCE:</span>   SQLite (events across runs)
+<span class="highlight">ENGINE STATE:</span>  Scaffold — not final cognition
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Layer</th><th>Status</th><th>Key File(s)</th><th>Assessment</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Foundation</td><td class="status-complete">COMPLETE</td><td>main.py</td><td>Runtime boots and runs. No issues reported.</td></tr>
+        <tr><td>Core</td><td class="status-complete">COMPLETE</td><td>Config, logging modules</td><td>Structured logging wired. Config working.</td></tr>
+        <tr><td>Orchestration</td><td class="status-partial">COMPLETE (scaffold)</td><td>src/orchestration/engine.py</td><td>Marked complete but behavior is primitive. Needs refactor to support task/request model. Treat as scaffold.</td></tr>
+        <tr><td>Memory</td><td class="status-complete">COMPLETE</td><td>src/memory/sqlite_store.py</td><td>SQLite-backed. Events persist across runs. First-class capability.</td></tr>
+        <tr><td>Interface</td><td class="status-partial">IN PROGRESS</td><td>src/interfaces/cli.py</td><td>Basic CLI exists. Missing: command language, status surface, memory inspection, task entry point.</td></tr>
+        <tr><td>NLP</td><td class="status-missing">NOT STARTED</td><td>—</td><td>Intentionally deferred. Design placement needed now, build later.</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ==================== SECTION 2: DESIGN CONSTRAINTS ==================== -->
+    <h2>2. Design Constraints from Architect Brief</h2>
+
+    <div class="callout">
+      <strong>Red Lines (Non-Negotiable)</strong>
+      <ul style="margin-top: 8px;">
+        <li><strong>Do not turn Prime into a chatbot.</strong> Prime executes structured tasks — it does not have conversations.</li>
+        <li><strong>Do not collapse reasoning and execution.</strong> Alistair thinks. Prime acts. The separation is architectural, not cosmetic.</li>
+        <li><strong>Do not overbuild.</strong> Modular, layered, runtime-oriented. Solo-operator scale.</li>
+        <li><strong>NLP must not bypass orchestration.</strong> NLP sits between raw input and routing — it feeds into orchestration, never around it.</li>
+      </ul>
+    </div>
+
+    <h3>Integration Target: Robo Stack</h3>
+    <p>Alistair Prime's next integration target is <strong>Robo Stack</strong> — the shared AWS + K3s infrastructure that hosts the Agentics platform. Prime will be the <strong>Cognitive Execution Core</strong> within Robo Stack. This means Prime must be containerizable, API-addressable, and stateless enough to run on K3s while maintaining SQLite persistence (or an equivalent).</p>
+
+    <div class="callout warning">
+      <strong>Robo Stack Dependency Risk:</strong> Per the Gap Register (INF-02), K3s manifests exist (64 files) but none are applied to a running cluster. K3s must be operational before Prime can be deployed to Robo Stack. This is a Sprint 5 deliverable that blocks Sprint 6 tower activation. Plan Prime's sprint work to be <strong>infrastructure-independent</strong> — containerization and deployment specs can be designed now but deployment is blocked until K3s is live.
+    </div>
+
+    <!-- ==================== SECTION 3: FOUR DOCUMENTS ==================== -->
+    <h2>3. Requested Architecture Documents — Scope & Sprint Mapping</h2>
+
+    <p>The brief requests four supporting documents. Each maps to specific sprint work and has defined inputs and outputs.</p>
+
+    <table>
+      <thead>
+        <tr><th>#</th><th>Document</th><th>Purpose</th><th>Inputs Required</th><th>Sprint Track</th><th>Priority</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><strong>System Architecture</strong></td>
+          <td>Canonical as-built + as-designed reference for all Prime layers, interfaces, data flows</td>
+          <td>Source code review (alistars-stack), CURRENT_STATE.md</td>
+          <td>Track A: Architecture</td>
+          <td class="status-complete">P1 — Prerequisite</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><strong>Interface Layer Spec</strong></td>
+          <td>Define command language, routing model, status surface, memory inspection, task entry point</td>
+          <td>System Architecture (Doc 1), current cli.py review</td>
+          <td>Track B: Interface Build</td>
+          <td class="status-complete">P1 — Active Build</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><strong>Task Model & Routing Spec</strong></td>
+          <td>Define what a "task" is in Prime, how requests route through orchestration, lifecycle states</td>
+          <td>System Architecture (Doc 1), current engine.py review</td>
+          <td>Track B: Interface Build</td>
+          <td class="status-partial">P2 — Enables Refactor</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><strong>NLP Layer Placement & Future Integration Plan</strong></td>
+          <td>Define where NLP sits in the stack, interfaces, what it does NOT touch, Robo Stack integration path</td>
+          <td>System Architecture (Doc 1), Robo Stack architecture</td>
+          <td>Track C: Future Design</td>
+          <td class="status-planned">P3 — Design Only</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Document Dependency Chain</h3>
+    <div class="arch-diagram">
+<span class="highlight">DOCUMENT FLOW</span>
+
+  ┌──────────────────┐
+  │  1. System Arch   │ ← Source code review required
+  │  (As-Built Map)   │
+  └────────┬─────────┘
+           │
+     ┌─────┴──────┐
+     ↓            ↓
+┌──────────┐ ┌──────────────┐
+│ 2. IFace │ │ 3. Task Model │
+│   Spec   │ │  & Routing    │
+└────┬─────┘ └──────┬───────┘
+     │               │
+     └───────┬───────┘
+             ↓
+   ┌──────────────────┐
+   │ 4. NLP Placement  │ ← Also needs Robo Stack arch
+   │ & Integration     │
+   └──────────────────┘
+    </div>
+
+    <!-- ==================== SECTION 4: SPRINT BREAKDOWN ==================== -->
+    <h2>4. Sprint Breakdown — Three Tracks</h2>
+
+    <p>Work is organized into three parallel tracks. Track A (Architecture) unblocks Tracks B and C. Track B (Interface Build) is the active construction work. Track C (Future Design) produces design docs only — no build.</p>
+
+    <!-- TRACK A -->
+    <div class="sprint-block">
+      <div class="sprint-title">TRACK A — Architecture Documentation (Subsprints A.1–A.3)</div>
+      <p style="color: var(--text-muted); margin-bottom: 16px;">Prerequisite work. Must complete before Track B refactoring begins. Can run in parallel with Track B interface completion.</p>
+
+      <h4>A.1 — Codebase Audit & As-Built Mapping</h4>
+      <table>
+        <thead><tr><th>Story</th><th>Description</th><th>Acceptance</th><th>Estimate</th></tr></thead>
+        <tbody>
+          <tr><td>A.1.1</td><td>Gain access to <code>alistars-stack</code> repo (PAT or SSH key)</td><td>Repo cloned, all files readable</td><td>Blocker</td></tr>
+          <tr><td>A.1.2</td><td>Audit <code>main.py</code> — map boot sequence, entry points, config loading</td><td>Foundation + Core layers documented with actual code references</td><td>S</td></tr>
+          <tr><td>A.1.3</td><td>Audit <code>engine.py</code> — map current orchestration flow, identify scaffold vs. permanent code</td><td>Orchestration layer documented; scaffold boundaries marked</td><td>M</td></tr>
+          <tr><td>A.1.4</td><td>Audit <code>sqlite_store.py</code> — map schema, event types, persistence model</td><td>Memory layer documented with schema + event taxonomy</td><td>S</td></tr>
+          <tr><td>A.1.5</td><td>Audit <code>cli.py</code> — map current interface capabilities and gaps</td><td>Interface layer gap list produced</td><td>S</td></tr>
+        </tbody>
+      </table>
+
+      <h4>A.2 — System Architecture Document (Doc 1)</h4>
+      <table>
+        <thead><tr><th>Story</th><th>Description</th><th>Acceptance</th><th>Estimate</th></tr></thead>
+        <tbody>
+          <tr><td>A.2.1</td><td>Produce System Architecture doc: all 5 layers, interfaces between layers, data flows, runtime lifecycle</td><td>Architecture doc committed to <code>alistars-stack/docs/</code></td><td>L</td></tr>
+          <tr><td>A.2.2</td><td>Produce architecture diagram (HTML, matching portfolio style)</td><td>Diagram reflects as-built state + planned extensions</td><td>M</td></tr>
+        </tbody>
+      </table>
+
+      <h4>A.3 — NLP Placement Document (Doc 4)</h4>
+      <table>
+        <thead><tr><th>Story</th><th>Description</th><th>Acceptance</th><th>Estimate</th></tr></thead>
+        <tbody>
+          <tr><td>A.3.1</td><td>Define NLP layer interfaces: input contract, output contract, what it feeds into (orchestration only)</td><td>NLP interface spec with clear boundary rules</td><td>M</td></tr>
+          <tr><td>A.3.2</td><td>Define Robo Stack integration architecture: containerization, API surface, persistence strategy on K3s, deployment model</td><td>Integration plan with Robo Stack prerequisites listed</td><td>L</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- TRACK B -->
+    <div class="sprint-block">
+      <div class="sprint-title">TRACK B — Interface Layer Completion & Orchestration Refactor (Subsprints B.1–B.3)</div>
+      <p style="color: var(--text-muted); margin-bottom: 16px;">Active build work. Interface completion can start immediately. Orchestration refactor starts after Doc 3 (Task Model) is complete.</p>
+
+      <h4>B.1 — Interface Layer Completion (Doc 2 → Build)</h4>
+      <table>
+        <thead><tr><th>Story</th><th>Description</th><th>Acceptance</th><th>Estimate</th></tr></thead>
+        <tbody>
+          <tr><td>B.1.1</td><td>Produce Interface Layer Specification (Doc 2): command language, routing, status, memory inspection, task entry</td><td>Spec doc reviewed and accepted</td><td>M</td></tr>
+          <tr><td>B.1.2</td><td>Implement command language: <code>help</code>, <code>status</code>, <code>memory</code>, <code>exit</code> as minimum viable commands</td><td>CLI recognizes and routes all 4 commands</td><td>M</td></tr>
+          <tr><td>B.1.3</td><td>Implement command vs. input separation: commands route to handlers, free input routes to engine</td><td>Typed commands execute handlers; non-commands flow to engine</td><td>M</td></tr>
+          <tr><td>B.1.4</td><td>Implement runtime status surface: <code>status</code> command returns layer health, memory stats, uptime</td><td>Status output shows meaningful runtime state</td><td>S</td></tr>
+          <tr><td>B.1.5</td><td>Implement memory inspection: <code>memory</code> command returns recent events, event count, storage size</td><td>Memory inspection shows queryable event history</td><td>S</td></tr>
+        </tbody>
+      </table>
+
+      <h4>B.2 — Task Model & Routing (Doc 3 → Build)</h4>
+      <table>
+        <thead><tr><th>Story</th><th>Description</th><th>Acceptance</th><th>Estimate</th></tr></thead>
+        <tbody>
+          <tr><td>B.2.1</td><td>Produce Task Model & Routing Specification (Doc 3): what a task is, lifecycle states, routing rules</td><td>Spec doc reviewed and accepted</td><td>M</td></tr>
+          <tr><td>B.2.2</td><td>Implement task abstraction: Task object with id, type, payload, state, result</td><td>Tasks are first-class runtime objects, logged to memory</td><td>M</td></tr>
+          <tr><td>B.2.3</td><td>Refactor engine.py to route tasks by type instead of passthrough</td><td>Engine dispatches tasks to handlers; passthrough eliminated</td><td>L</td></tr>
+        </tbody>
+      </table>
+
+      <h4>B.3 — Integration Readiness</h4>
+      <table>
+        <thead><tr><th>Story</th><th>Description</th><th>Acceptance</th><th>Estimate</th></tr></thead>
+        <tbody>
+          <tr><td>B.3.1</td><td>Define and expose a task submission API (HTTP or socket) for external callers</td><td>Prime accepts tasks via API, not just CLI</td><td>L</td></tr>
+          <tr><td>B.3.2</td><td>Produce Dockerfile for Prime runtime</td><td>Prime runs in container with SQLite volume mount</td><td>M</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- TRACK C -->
+    <div class="sprint-block">
+      <div class="sprint-title">TRACK C — Future Design (Design Only, No Build)</div>
+      <p style="color: var(--text-muted); margin-bottom: 16px;">Produces design docs for future sprint work. No code output. Runs in parallel with Tracks A and B after Doc 1 is complete.</p>
+      <p>Track C is covered by stories A.3.1 and A.3.2 above. Output is Doc 4 (NLP Layer Placement and Future Integration Plan). Key design decisions to resolve:</p>
+      <ul>
+        <li>NLP input contract: raw text → structured intent + entities → task object</li>
+        <li>NLP routing rule: NLP output feeds orchestration layer only — never bypasses it</li>
+        <li>NLP model strategy: external API (Claude) vs. self-hosted on K3s vs. hybrid</li>
+        <li>Robo Stack integration: Prime as K3s deployment, API-addressable, persistent storage strategy</li>
+      </ul>
+    </div>
+
+    <!-- ==================== SECTION 5: SPRINT SEQUENCING ==================== -->
+    <h2>5. Recommended Sprint Sequencing</h2>
+
+    <table>
+      <thead>
+        <tr><th>Phase</th><th>Stories</th><th>Deliverables</th><th>Blockers</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Phase 0: Access</strong><br><span style="color: var(--text-muted);">Day 0</span></td>
+          <td>A.1.1</td>
+          <td>Repo access established</td>
+          <td class="status-missing">BLOCKED — need PAT for alistars-stack</td>
+        </tr>
+        <tr>
+          <td><strong>Phase 1: Audit</strong><br><span style="color: var(--text-muted);">Days 1–3</span></td>
+          <td>A.1.2, A.1.3, A.1.4, A.1.5</td>
+          <td>Complete as-built mapping of all layers</td>
+          <td>Depends on Phase 0</td>
+        </tr>
+        <tr>
+          <td><strong>Phase 2: Architecture Docs</strong><br><span style="color: var(--text-muted);">Days 3–5</span></td>
+          <td>A.2.1, A.2.2, B.1.1, B.2.1</td>
+          <td>Doc 1 (System Arch), Doc 2 (Interface Spec), Doc 3 (Task Model Spec)</td>
+          <td>Depends on Phase 1</td>
+        </tr>
+        <tr>
+          <td><strong>Phase 3: Interface Build</strong><br><span style="color: var(--text-muted);">Days 5–10</span></td>
+          <td>B.1.2, B.1.3, B.1.4, B.1.5</td>
+          <td>Interface Layer complete — command language, status, memory inspection</td>
+          <td>Depends on Doc 2</td>
+        </tr>
+        <tr>
+          <td><strong>Phase 4: Task Model Build</strong><br><span style="color: var(--text-muted);">Days 8–14</span></td>
+          <td>B.2.2, B.2.3</td>
+          <td>Task abstraction implemented, engine refactored</td>
+          <td>Depends on Doc 3; overlaps Phase 3</td>
+        </tr>
+        <tr>
+          <td><strong>Phase 5: Integration Design</strong><br><span style="color: var(--text-muted);">Days 10–14</span></td>
+          <td>A.3.1, A.3.2, B.3.1, B.3.2</td>
+          <td>Doc 4 (NLP + Integration Plan), API surface, Dockerfile</td>
+          <td>Robo Stack arch needed for A.3.2; K3s needed for deployment</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ==================== SECTION 6: RISK REGISTER ==================== -->
+    <h2>6. Risk Register</h2>
+
+    <table>
+      <thead>
+        <tr><th>Risk</th><th>Impact</th><th>Likelihood</th><th>Mitigation</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>alistars-stack repo inaccessible</strong></td>
+          <td class="status-missing">HIGH</td>
+          <td class="status-missing">ACTIVE</td>
+          <td>Provide PAT or make repo public. All build work blocked until access is resolved.</td>
+        </tr>
+        <tr>
+          <td><strong>Robo Stack K3s not operational</strong></td>
+          <td class="status-partial">MEDIUM</td>
+          <td class="status-partial">HIGH</td>
+          <td>Design integration specs now. Defer deployment to post-K3s sprint. Prime stays local-runnable.</td>
+        </tr>
+        <tr>
+          <td><strong>Engine refactor scope creep</strong></td>
+          <td class="status-partial">MEDIUM</td>
+          <td class="status-partial">MEDIUM</td>
+          <td>Doc 3 (Task Model) defines scope. Refactor only what the spec calls for. Scaffold code stays until replaced.</td>
+        </tr>
+        <tr>
+          <td><strong>NLP design pulls into build prematurely</strong></td>
+          <td class="status-partial">MEDIUM</td>
+          <td class="status-planned">LOW</td>
+          <td>Brief explicitly defers NLP build. Doc 4 is design-only. Red line enforced.</td>
+        </tr>
+        <tr>
+          <td><strong>SQLite persistence insufficient for K3s</strong></td>
+          <td class="status-planned">LOW</td>
+          <td class="status-partial">MEDIUM</td>
+          <td>SQLite works with PVC on K3s. If scale requires it, PostgreSQL migration is a clean swap due to layered architecture.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ==================== SECTION 7: CROSS-PROJECT DEPENDENCIES ==================== -->
+    <h2>7. Cross-Project Dependencies</h2>
+
+    <div class="dep-grid">
+      <div class="dep-card">
+        <h4>Robo Stack → Prime</h4>
+        <p>K3s cluster must be operational for Prime deployment. Currently blocked (INF-02). Prime should be designed to run locally AND on K3s — same container, different target.</p>
+      </div>
+      <div class="dep-card">
+        <h4>Agentics Framework → Prime</h4>
+        <p>Sprint 6 activates all 5 towers. Prime's task submission API (B.3.1) could serve as the execution backend for tower-generated tasks. This is an integration opportunity, not a dependency.</p>
+      </div>
+      <div class="dep-card">
+        <h4>The Markdown → Prime (Future)</h4>
+        <p>Content pipeline Signal → Meaning → Output flow could route through Prime for orchestration. Not in this sprint — design placement only.</p>
+      </div>
+      <div class="dep-card">
+        <h4>Alistair (ChatGPT) → Prime</h4>
+        <p>The reasoning/execution split means Alistair sends structured task requests to Prime. The task submission API (B.3.1) is the integration point. Contract must be defined in Doc 3.</p>
+      </div>
+    </div>
+
+    <!-- ==================== SECTION 8: ARCHITECTURE DECISIONS NEEDED ==================== -->
+    <h2>8. Architecture Decisions Required Before Build</h2>
+
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Decision</th><th>Options</th><th>Recommendation</th><th>Blocks</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>AD-AP-01</td>
+          <td><strong>Task submission protocol</strong></td>
+          <td>HTTP REST / gRPC / Unix socket / stdin pipe</td>
+          <td>HTTP REST — simplest, K3s-native, debuggable with curl. Add socket later if latency matters.</td>
+          <td>B.3.1</td>
+        </tr>
+        <tr>
+          <td>AD-AP-02</td>
+          <td><strong>Command language scope</strong></td>
+          <td>Minimal (4 commands) / Extended (10+) / Plugin-based</td>
+          <td>Minimal first (help, status, memory, exit). Add task, config, log as Phase 2. No plugins yet.</td>
+          <td>B.1.2</td>
+        </tr>
+        <tr>
+          <td>AD-AP-03</td>
+          <td><strong>Task lifecycle model</strong></td>
+          <td>Simple (pending → running → done) / Full (pending → queued → running → success/failed/cancelled)</td>
+          <td>Simple first. Add queued + cancelled when external callers need them.</td>
+          <td>B.2.2</td>
+        </tr>
+        <tr>
+          <td>AD-AP-04</td>
+          <td><strong>Persistence strategy for K3s</strong></td>
+          <td>SQLite + PVC / PostgreSQL / Both (SQLite local, PG remote)</td>
+          <td>SQLite + PVC. Clean, proven, no external dependency. Migrate if scale demands it.</td>
+          <td>B.3.2, A.3.2</td>
+        </tr>
+        <tr>
+          <td>AD-AP-05</td>
+          <td><strong>NLP layer model source</strong></td>
+          <td>Claude API only / Self-hosted LLM only / Hybrid (Claude + fallback)</td>
+          <td>Design for hybrid. Default to Claude API. Self-hosted LLM as fallback when K3s supports it. Decision deferred to NLP build sprint.</td>
+          <td>A.3.1 (design only)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ==================== SECTION 9: NEXT ACTIONS ==================== -->
+    <h2>9. Next Actions</h2>
+
+    <div class="callout goal">
+      <strong>Immediate (Before Sprint Starts):</strong>
+      <ol style="margin-top: 8px;">
+        <li><strong>Resolve repo access.</strong> Provide a PAT for <code>alistars-stack</code> or make it public. This is the hard blocker.</li>
+        <li><strong>Decide AD-AP-01 through AD-AP-04.</strong> These are the four architecture decisions that gate build work.</li>
+        <li><strong>Confirm sprint scope.</strong> This analysis proposes 18 stories across 5 phases. Confirm or trim.</li>
+      </ol>
+    </div>
+
+    <div class="callout">
+      <strong>Sprint Kickoff (Once Access Resolved):</strong>
+      <ol style="margin-top: 8px;">
+        <li>Run codebase audit (Phase 1 — stories A.1.2 through A.1.5)</li>
+        <li>Produce Doc 1 (System Architecture) — this unblocks everything downstream</li>
+        <li>Produce Docs 2 and 3 in parallel — Interface Spec and Task Model Spec</li>
+        <li>Begin Interface Layer build work immediately after Doc 2 is accepted</li>
+      </ol>
+    </div>
+
+    <div class="callout info">
+      <strong>Relationship to Sprint 6 (Agentics MVP):</strong> This Alistair Prime sprint is a <strong>parallel track</strong> to Sprint 6. Sprint 6 activates the 5 Agentics towers and runs the first Signal → Meaning → Output pipeline demo. Prime's task submission API (B.3.1) is a future integration point for Agentics tower-generated tasks, but it is not a Sprint 6 dependency. The two tracks can proceed independently.
+    </div>
+
+    <div class="footer">
+      <p><strong>Foreman — Architecture Analysis</strong> | Produced 2026-03-23 | Source: CURRENT_STATE.md, Architect Brief, the-foremans-build-stack repo, Gap Register, Sprint 6 Plan</p>
+      <p style="margin-top: 8px;"><em>"The mission defines the architecture. The architecture secures the mission."</em></p>
+    </div>
+  </div>
+</body>
+</html>
