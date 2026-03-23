@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentics — Integrated Architecture & Org Chart v2</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #08080d; color: #e0e0e0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 24px; min-height: 100vh; overflow-x: auto; }
+
+  .chart { display: flex; flex-direction: column; align-items: center; min-width: 1200px; max-width: 1400px; margin: 0 auto; }
+
+  /* ===== CONNECTOR LINES ===== */
+  .vline { width: 2px; height: 28px; background: #333; margin: 0 auto; }
+  .vline-short { width: 2px; height: 16px; background: #333; margin: 0 auto; }
+
+  /* ===== VERSION BADGE ===== */
+  .version-bar { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .version-badge { font-size: 9px; padding: 3px 10px; border-radius: 3px; background: rgba(88,166,255,0.15); color: #58a6ff; border: 1px solid rgba(88,166,255,0.3); font-weight: 600; letter-spacing: 0.5px; }
+  .version-date { font-size: 10px; color: #444; }
+
+  /* ===== TOP: FOUNDER ===== */
+  .founder {
+    background: linear-gradient(135deg, #1a1000 0%, #2a1800 100%);
+    border: 2px solid #f59e0b;
+    border-radius: 12px;
+    padding: 16px 32px;
+    text-align: center;
+    position: relative;
+    min-width: 360px;
+  }
+  .founder h2 { color: #f59e0b; font-size: 18px; margin-bottom: 2px; }
+  .founder .title { color: #d97706; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+  .founder .desc { color: #888; font-size: 11px; margin-top: 6px; }
+  .founder-badge { display: inline-block; background: #422006; color: #fbbf24; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 3px; margin-top: 6px; letter-spacing: 0.5px; }
+
+  /* ===== BRAND BAR ===== */
+  .brand-bar { display: flex; gap: 16px; justify-content: center; margin: 0; }
+  .brand-card { padding: 10px 20px; border-radius: 8px; text-align: center; min-width: 180px; }
+  .brand-card h4 { font-size: 13px; margin-bottom: 2px; }
+  .brand-card p { font-size: 10px; }
+  .bc-ns { background: rgba(245,158,11,0.08); border: 1px solid #422006; }
+  .bc-ns h4 { color: #f59e0b; }
+  .bc-ns p { color: #92400e; }
+  .bc-ag { background: rgba(139,92,246,0.08); border: 1px solid #3b0764; }
+  .bc-ag h4 { color: #a78bfa; }
+  .bc-ag p { color: #6d28d9; }
+  .bc-a3 { background: rgba(6,182,212,0.08); border: 1px solid #164e63; }
+  .bc-a3 h4 { color: #22d3ee; }
+  .bc-a3 p { color: #0e7490; }
+
+  /* ===== COGNITIVE LAYER (NEW) ===== */
+  .cognitive-layer {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: stretch;
+  }
+  .cog-card {
+    flex: 1;
+    max-width: 380px;
+    border-radius: 10px;
+    padding: 16px 20px;
+    position: relative;
+  }
+  .cog-card h3 { font-size: 14px; margin-bottom: 4px; }
+  .cog-card .cog-role { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .cog-card .cog-desc { font-size: 11px; color: #999; margin-bottom: 10px; }
+  .cog-card .cog-detail { font-size: 10px; color: #666; }
+  .cog-card .cog-detail strong { color: #999; }
+
+  .cog-alistair {
+    background: rgba(251,191,36,0.06);
+    border: 1px solid #422006;
+  }
+  .cog-alistair h3 { color: #fbbf24; }
+  .cog-alistair .cog-role { color: #a16207; }
+
+  .cog-prime {
+    background: rgba(6,182,212,0.06);
+    border: 2px solid #0891b2;
+  }
+  .cog-prime h3 { color: #22d3ee; }
+  .cog-prime .cog-role { color: #0891b2; }
+
+  .cog-bridge {
+    flex: 0 0 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .cog-bridge-line { width: 60px; height: 2px; background: #333; }
+  .cog-bridge-label { font-size: 8px; color: #555; text-transform: uppercase; letter-spacing: 1px; writing-mode: horizontal-tb; }
+  .cog-bridge-arrow { color: #555; font-size: 14px; }
+
+  /* Prime internal layers */
+  .prime-layers { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .prime-layer { font-size: 9px; padding: 3px 8px; border-radius: 3px; font-weight: 600; }
+  .pl-done { background: #052e16; color: #4ade80; }
+  .pl-wip { background: #1a1a00; color: #eab308; }
+  .pl-future { background: #1a0a1a; color: #a78bfa; }
+
+  /* ===== TOWER SECTION ===== */
+  .towers-container { display: flex; gap: 12px; justify-content: center; width: 100%; margin-top: 0; }
+
+  .tower { flex: 1; max-width: 200px; min-width: 170px; display: flex; flex-direction: column; align-items: center; gap: 0; }
+
+  .tower-header { width: 100%; padding: 12px 14px; border-radius: 8px 8px 0 0; text-align: center; border-bottom: none; }
+  .tower-header h3 { font-size: 12px; margin-bottom: 1px; }
+  .tower-header .role { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+
+  .tower-body { width: 100%; display: flex; flex-direction: column; gap: 0; }
+
+  .tower-cell { width: 100%; padding: 8px 12px; border-left: 1px solid #222; border-right: 1px solid #222; border-bottom: 1px solid #1a1a1a; background: #0c0c14; font-size: 10px; }
+  .tower-cell:last-child { border-radius: 0 0 8px 8px; border-bottom: 1px solid #222; }
+  .tower-cell .cell-label { color: #555; font-size: 8px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; margin-bottom: 2px; }
+  .tower-cell .cell-value { color: #ccc; font-size: 10px; }
+  .tower-cell .cell-sub { color: #444; font-size: 9px; margin-top: 1px; }
+
+  .cell-status { display: inline-block; width: 6px; height: 6px; border-radius: 1px; margin-right: 3px; vertical-align: middle; }
+  .cs-active { background: #22c55e; }
+  .cs-partial { background: #eab308; }
+  .cs-planned { background: #ef4444; }
+  .cs-concept { background: #8b5cf6; }
+  .cs-new { background: #22d3ee; }
+
+  /* Tower colors */
+  .th-architect { background: rgba(96,165,250,0.12); border: 1px solid #1e3a5f; border-bottom: none; }
+  .th-architect h3 { color: #60a5fa; }
+  .th-architect .role { color: #1d4ed8; }
+
+  .th-builder { background: rgba(74,222,128,0.12); border: 1px solid #052e16; border-bottom: none; }
+  .th-builder h3 { color: #4ade80; }
+  .th-builder .role { color: #15803d; }
+
+  .th-editorial { background: rgba(251,191,36,0.12); border: 1px solid #422006; border-bottom: none; }
+  .th-editorial h3 { color: #fbbf24; }
+  .th-editorial .role { color: #a16207; }
+
+  .th-creative { background: rgba(192,132,252,0.12); border: 1px solid #3b0764; border-bottom: none; }
+  .th-creative h3 { color: #c084fc; }
+  .th-creative .role { color: #7c3aed; }
+
+  .th-infra { background: rgba(34,211,238,0.12); border: 1px solid #164e63; border-bottom: none; }
+  .th-infra h3 { color: #22d3ee; }
+  .th-infra .role { color: #0891b2; }
+
+  .th-client { background: rgba(248,113,113,0.10); border: 1px solid #3b1111; border-bottom: none; border-style: dashed; }
+  .th-client h3 { color: #f87171; }
+  .th-client .role { color: #b91c1c; }
+
+  /* ===== INTEGRATION FLOW (NEW) ===== */
+  .integration-flow {
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 20px;
+    padding: 16px 20px;
+    border: 1px solid #164e63;
+    border-radius: 8px;
+    background: rgba(6,182,212,0.03);
+  }
+  .integration-flow h4 { color: #22d3ee; font-size: 13px; margin-bottom: 12px; }
+  .flow-diagram {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #888;
+    white-space: pre;
+    line-height: 1.5;
+    overflow-x: auto;
+  }
+  .flow-diagram .fd-highlight { color: #22d3ee; }
+  .flow-diagram .fd-tower { color: #60a5fa; }
+  .flow-diagram .fd-alistair { color: #fbbf24; }
+  .flow-diagram .fd-prime { color: #22d3ee; font-weight: bold; }
+  .flow-diagram .fd-memory { color: #4ade80; }
+  .flow-diagram .fd-connector { color: #a78bfa; }
+
+  /* ===== PROJECTS BAR ===== */
+  .projects-bar { display: flex; gap: 12px; width: 100%; max-width: 1200px; flex-wrap: wrap; }
+  .project-card { flex: 1; min-width: 220px; padding: 12px 16px; border-radius: 8px; }
+  .project-card h4 { font-size: 13px; margin-bottom: 2px; }
+  .project-card p { font-size: 10px; margin-bottom: 4px; }
+  .project-badge { font-size: 9px; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+
+  /* ===== FOUNDATION BAR ===== */
+  .foundation {
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 20px;
+    padding: 14px 20px;
+    border: 1px solid #052e16;
+    border-radius: 8px;
+    background: rgba(34,197,94,0.04);
+    text-align: center;
+  }
+  .foundation h4 { color: #22c55e; font-size: 13px; margin-bottom: 4px; }
+  .foundation p { color: #555; font-size: 10px; }
+  .infra-tags { display: flex; gap: 8px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
+  .infra-tag { font-size: 9px; padding: 3px 8px; border-radius: 3px; font-weight: 600; }
+  .it-active { background: #052e16; color: #4ade80; }
+  .it-partial { background: #1a1a00; color: #eab308; }
+  .it-missing { background: #1a0808; color: #f87171; }
+  .it-new { background: #0a1a1a; color: #22d3ee; border: 1px solid #164e63; }
+
+  /* ===== ADR TABLE (NEW) ===== */
+  .adr-section {
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 20px;
+  }
+  .adr-section h4 { color: #58a6ff; font-size: 13px; margin-bottom: 12px; }
+  .adr-table { width: 100%; border-collapse: collapse; font-size: 10px; }
+  .adr-table th { background: rgba(88,166,255,0.08); color: #58a6ff; padding: 8px 10px; text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #222; }
+  .adr-table td { padding: 8px 10px; border-bottom: 1px solid #1a1a1a; color: #999; }
+  .adr-table tr:last-child td { border-bottom: none; }
+  .adr-id { color: #58a6ff; font-family: monospace; font-weight: 600; }
+  .adr-project { font-size: 9px; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+  .adr-p-prime { background: #0a1a1a; color: #22d3ee; }
+  .adr-p-all { background: #1a1a00; color: #eab308; }
+  .adr-p-markdown { background: #1a0a00; color: #f59e0b; }
+  .adr-p-bsw { background: #0a1a0a; color: #4ade80; }
+  .adr-p-jk { background: #1a0a1a; color: #a78bfa; }
+  .adr-new { background: rgba(6,182,212,0.06); }
+
+  /* ===== SECTION LABELS ===== */
+  .section-label {
+    width: 100%;
+    max-width: 1200px;
+    text-align: left;
+    margin: 20px 0 8px 0;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #444;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: #1a1a24; }
+
+  /* connector fan */
+  .fan-connector { width: 100%; max-width: 1200px; height: 24px; position: relative; }
+  .fan-connector::before { content: ''; position: absolute; top: 0; left: 50%; width: 2px; height: 12px; background: #333; transform: translateX(-50%); }
+  .fan-connector::after { content: ''; position: absolute; top: 12px; left: calc(50% - 540px); width: 1080px; height: 2px; background: #333; }
+
+  .tower-connectors { display: flex; gap: 12px; justify-content: center; width: 100%; max-width: 1200px; }
+  .tc-line { flex: 1; max-width: 200px; min-width: 170px; display: flex; justify-content: center; }
+  .tc-line::before { content: ''; display: block; width: 2px; height: 12px; background: #333; }
+
+  /* Prime connector to towers */
+  .prime-fan { width: 100%; max-width: 1200px; height: 20px; position: relative; }
+  .prime-fan::before { content: ''; position: absolute; top: 0; left: 50%; width: 2px; height: 10px; background: #0891b2; transform: translateX(-50%); }
+  .prime-fan::after { content: ''; position: absolute; top: 10px; left: calc(50% - 540px); width: 1080px; height: 2px; background: linear-gradient(90deg, transparent 0%, #0891b2 15%, #0891b2 85%, transparent 100%); }
+
+  .prime-tower-connectors { display: flex; gap: 12px; justify-content: center; width: 100%; max-width: 1200px; }
+  .ptc-line { flex: 1; max-width: 200px; min-width: 170px; display: flex; justify-content: center; }
+  .ptc-line::before { content: ''; display: block; width: 2px; height: 10px; background: #0891b2; opacity: 0.5; }
+
+  /* Legend */
+  .legend { display: flex; gap: 16px; margin-top: 24px; justify-content: center; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #666; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+  .ld-active { background: #22c55e; }
+  .ld-partial { background: #eab308; }
+  .ld-planned { background: #ef4444; }
+  .ld-concept { background: #8b5cf6; }
+  .ld-new { background: #22d3ee; }
+</style>
+</head>
+<body>
+
+<div class="chart">
+
+  <!-- VERSION BAR -->
+  <div class="version-bar">
+    <span class="version-badge">AGENTICS ARCHITECTURE + ORG CHART v2</span>
+    <span class="version-date">Updated 2026-03-23 | Includes Alistair Prime integration + AD-0011–AD-0015</span>
+  </div>
+
+  <!-- ===== FOUNDER / ORCHESTRATOR ===== -->
+  <div class="founder">
+    <h2>Justin "Yeti" Kuiper</h2>
+    <div class="title">Founder · Orchestrator · Chief Cyber Architect</div>
+    <div class="desc">Routes work across AI agents · Bridges context between sessions · Final judgment on all output</div>
+    <div><span class="founder-badge">HUMAN IN THE LOOP</span></div>
+  </div>
+
+  <div class="vline"></div>
+
+  <!-- ===== BRAND / IDENTITY LAYER ===== -->
+  <div class="section-label">Brand & Identity Layer</div>
+  <div class="brand-bar">
+    <div class="brand-card bc-ns">
+      <h4>Non Sequitur</h4>
+      <p>Client-facing brand · Experience layer</p>
+    </div>
+    <div class="brand-card bc-ag">
+      <h4>Agentics</h4>
+      <p>Manufacturing floor · Operating model</p>
+    </div>
+    <div class="brand-card bc-a3">
+      <h4>ag3ntics</h4>
+      <p>Technical identity · System domain</p>
+    </div>
+  </div>
+
+  <div class="vline"></div>
+
+  <!-- ===== COGNITIVE LAYER (NEW — ALISTAIR + PRIME) ===== -->
+  <div class="section-label">Cognitive Layer — Reasoning / Execution Split <span style="font-size: 8px; color: #0891b2; background: rgba(6,182,212,0.15); padding: 1px 6px; border-radius: 3px; margin-left: 8px;">NEW</span></div>
+
+  <div class="cognitive-layer">
+    <!-- ALISTAIR (Reasoning) -->
+    <div class="cog-card cog-alistair">
+      <h3>Alistair</h3>
+      <div class="cog-role">Cognitive Interface — Thinks</div>
+      <div class="cog-desc">Reasoning layer. Classifies intent, plans task sequences, makes judgment calls about routing and prioritization. The intelligence.</div>
+      <div class="cog-detail">
+        <strong>Platform:</strong> ChatGPT<br>
+        <strong>Boundary:</strong> Tasks NEVER live here. Alistair thinks about doing. Gunther does.<br>
+        <strong>Output:</strong> Structured task requests → Alistair Prime
+      </div>
+    </div>
+
+    <!-- BRIDGE -->
+    <div class="cog-bridge">
+      <div class="cog-bridge-label">Structured</div>
+      <div class="cog-bridge-label">Tasks</div>
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <div class="cog-bridge-line"></div>
+      </div>
+      <div class="cog-bridge-label" style="color: #0891b2;">Unix Socket</div>
+      <div class="cog-bridge-label" style="color: #0891b2;">AD-0011</div>
+    </div>
+
+    <!-- ALISTAIR PRIME (Execution) -->
+    <div class="cog-card cog-prime">
+      <h3>Alistair Prime</h3>
+      <div class="cog-role">Cognitive Runtime — Acts</div>
+      <div class="cog-desc">Execution layer. Receives structured tasks, routes them through orchestration, persists events to memory, dispatches to towers and external services.</div>
+      <div class="cog-detail">
+        <strong>Platform:</strong> Python runtime · Local process<br>
+        <strong>Repo:</strong> <span style="font-family: monospace;">alistars-stack</span><br>
+        <strong>Interface:</strong> Unix socket (AD-0011) + CLI (AD-0012)<br>
+        <strong>Persistence:</strong> SQLite + PVC (AD-0014)
+      </div>
+      <div class="prime-layers">
+        <span class="prime-layer pl-done">Foundation ✓</span>
+        <span class="prime-layer pl-done">Core ✓</span>
+        <span class="prime-layer pl-done">Orchestration ✓</span>
+        <span class="prime-layer pl-done">Memory ✓</span>
+        <span class="prime-layer pl-done">Interface ✓</span>
+        <span class="prime-layer pl-future">NLP (Design Only)</span>
+        <span class="prime-layer pl-future">Connectors</span>
+        <span class="prime-layer pl-future">Security</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PRIME → TOWERS CONNECTION ===== -->
+  <div class="section-label">Orchestration Path — Prime dispatches to Towers via outbound connectors</div>
+
+  <div class="prime-fan"></div>
+  <div class="prime-tower-connectors">
+    <div class="ptc-line"></div>
+    <div class="ptc-line"></div>
+    <div class="ptc-line"></div>
+    <div class="ptc-line"></div>
+    <div class="ptc-line"></div>
+    <div class="ptc-line"></div>
+  </div>
+
+  <!-- ===== SECTION LABEL ===== -->
+  <div class="section-label">Vertical Towers — AI Agent Divisions</div>
+
+  <!-- ===== THE TOWERS ===== -->
+  <div class="towers-container">
+
+    <!-- TOWER 1: ARCHITECT -->
+    <div class="tower">
+      <div class="tower-header th-architect">
+        <h3>The Architect</h3>
+        <div class="role">System Design & Strategy</div>
+      </div>
+      <div class="tower-body">
+        <div class="tower-cell">
+          <div class="cell-label">Platform</div>
+          <div class="cell-value">Claude · Cowork</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Personas</div>
+          <div class="cell-value">Foreman, Overwatch, Taskmaster</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Repos</div>
+          <div class="cell-value" style="font-family: monospace; font-size: 9px;">the-foremans-build-stack<br>robo-stack · alistars-stack</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Prime Integration</div>
+          <div class="cell-value"><span class="cell-status cs-concept"></span> Design authority — specs feed Prime's task model</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Status</div>
+          <div class="cell-value"><span class="cell-status cs-active"></span> Active</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOWER 2: BUILDER -->
+    <div class="tower">
+      <div class="tower-header th-builder">
+        <h3>The Builder</h3>
+        <div class="role">Product Development</div>
+      </div>
+      <div class="tower-body">
+        <div class="tower-cell">
+          <div class="cell-label">Platform</div>
+          <div class="cell-value">Claude · Account B</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Personas</div>
+          <div class="cell-value">Developer</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Repos</div>
+          <div class="cell-value" style="font-family: monospace; font-size: 9px;">the-markdown<br>content-ops · alistars-stack</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Prime Integration</div>
+          <div class="cell-value"><span class="cell-status cs-new"></span> Receives build tasks from Prime engine</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Status</div>
+          <div class="cell-value"><span class="cell-status cs-active"></span> Active</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOWER 3: EDITORIAL -->
+    <div class="tower">
+      <div class="tower-header th-editorial">
+        <h3>The Editor</h3>
+        <div class="role">Content & Editorial</div>
+      </div>
+      <div class="tower-body">
+        <div class="tower-cell">
+          <div class="cell-label">Platform</div>
+          <div class="cell-value">Claude · Cowork</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Personas</div>
+          <div class="cell-value">Content Lab</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Repos</div>
+          <div class="cell-value" style="font-family: monospace; font-size: 9px;">the-markdown<br>content-ops</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Prime Integration</div>
+          <div class="cell-value"><span class="cell-status cs-concept"></span> Future — content pipeline routing</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Status</div>
+          <div class="cell-value"><span class="cell-status cs-partial"></span> Partially active</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOWER 4: CREATIVE -->
+    <div class="tower">
+      <div class="tower-header th-creative">
+        <h3>The Creative</h3>
+        <div class="role">Design & Content</div>
+      </div>
+      <div class="tower-body">
+        <div class="tower-cell">
+          <div class="cell-label">Platform</div>
+          <div class="cell-value">ChatGPT / Canva</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Personas</div>
+          <div class="cell-value">Alistair (shared)</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Repos</div>
+          <div class="cell-value" style="font-family: monospace; font-size: 9px;">TBD</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Prime Integration</div>
+          <div class="cell-value"><span class="cell-status cs-concept"></span> Future — outbound API dispatch</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Status</div>
+          <div class="cell-value"><span class="cell-status cs-concept"></span> Needs definition</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOWER 5: ENGINEER -->
+    <div class="tower">
+      <div class="tower-header th-infra">
+        <h3>The Engineer</h3>
+        <div class="role">DevOps & Infrastructure</div>
+      </div>
+      <div class="tower-body">
+        <div class="tower-cell">
+          <div class="cell-label">Platform</div>
+          <div class="cell-value">Windsurf / Claude</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Personas</div>
+          <div class="cell-value">DevOps</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Repos</div>
+          <div class="cell-value" style="font-family: monospace; font-size: 9px;">robo-stack<br>the-foremans-build-stack</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Prime Integration</div>
+          <div class="cell-value"><span class="cell-status cs-new"></span> Hosts Prime on Robo Stack K3s</div>
+        </div>
+        <div class="tower-cell">
+          <div class="cell-label">Status</div>
+          <div class="cell-value"><span class="cell-status cs-partial"></span> Infra built, K3s not deployed</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOWER 6: CLIENT -->
+    <div class="tower">
+      <div class="tower-header th-client" style="border-bottom-style: dashed;">
+        <h3>Client Tower(s)</h3>
+        <div class="role">Future · Repeatable</div>
+      </div>
+      <div class="tower-body">
+        <div class="tower-cell" style="border-style: dashed; border-color: #222;">
+          <div class="cell-label">Platform</div>
+          <div class="cell-value" style="color: #666;">Assigned per project</div>
+        </div>
+        <div class="tower-cell" style="border-style: dashed; border-color: #222;">
+          <div class="cell-label">Personas</div>
+          <div class="cell-value" style="color: #666;">Per project</div>
+        </div>
+        <div class="tower-cell" style="border-style: dashed; border-color: #222;">
+          <div class="cell-label">Repos</div>
+          <div class="cell-value" style="font-family: monospace; font-size: 9px; color: #444;">project-{client}</div>
+        </div>
+        <div class="tower-cell" style="border-style: dashed; border-color: #222;">
+          <div class="cell-label">Prime Integration</div>
+          <div class="cell-value" style="color: #666;"><span class="cell-status cs-planned"></span> Future — task orchestration</div>
+        </div>
+        <div class="tower-cell" style="border-style: dashed; border-color: #222; border-radius: 0 0 8px 8px;">
+          <div class="cell-label">Status</div>
+          <div class="cell-value"><span class="cell-status cs-planned"></span> Future</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== INTEGRATION FLOW DIAGRAM ===== -->
+  <div class="integration-flow">
+    <h4>Runtime Integration Flow — How Prime Connects Everything</h4>
+    <div class="flow-diagram">
+<span class="fd-alistair">ALISTAIR (ChatGPT)</span>                              <span class="fd-tower">TOWER AGENTS</span>
+  Reasoning Layer                                  Architect · Builder · Editor
+        │                                          Engineer · Creative
+        │ structured task                                  ▲
+        ▼                                                  │ outbound HTTPS
+┌───────────────────────────────────────────────────────────┤
+│                                                           │
+│  <span class="fd-prime">ALISTAIR PRIME — COGNITIVE RUNTIME</span>                      │
+│                                                           │
+│  ┌──────────┐    ┌──────────────┐    ┌──────────────┐     │
+│  │ <span class="fd-highlight">Interface</span> │───▶│ <span class="fd-highlight">Orchestration</span> │───▶│ <span class="fd-connector">Connectors</span>   │─────┘
+│  │ CLI/Socket│    │ Engine       │    │ GitHub, Claude│
+│  │ AD-0012   │    │ AD-0013      │    │ Copilot, APIs│     <span class="fd-connector">EXTERNAL SERVICES</span>
+│  └──────────┘    └──────┬───────┘    └──────────────┘     GitHub API
+│                         │                                  Claude API
+│                         ▼                                  Copilot
+│                  ┌──────────────┐                          ChatGPT API
+│                  │ <span class="fd-memory">Memory</span>        │                          Webhooks (future)
+│                  │ SQLite/PVC   │
+│                  │ AD-0014      │
+│                  └──────────────┘
+│                                                           │
+│  <span style="color: #555;">Unix Socket (AD-0011) · 3-State Tasks (AD-0013) · Hybrid NLP future (AD-0015)</span>
+└───────────────────────────────────────────────────────────┘
+        │
+        ▼
+  <span class="fd-memory">ROBO STACK (K3s)</span> — deployment target (when K3s is operational)
+    </div>
+  </div>
+
+  <!-- ===== PROJECTS BAR ===== -->
+  <div class="section-label" style="margin-top: 24px;">Active Projects — What the System Produces</div>
+  <div class="projects-bar">
+    <div class="project-card" style="border: 1px solid #422006; background: rgba(245,158,11,0.04);">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="color: #f59e0b;">The Markdown</h4>
+        <span class="project-badge" style="background: #422006; color: #fbbf24;">87% COMPLETE</span>
+      </div>
+      <p style="color: #777;">Content curation · RSS → AI → Editorial → Briefing</p>
+      <p style="color: #555; font-size: 9px;">Towers: Builder, Editor, Engineer · Repo: the-markdown</p>
+    </div>
+    <div class="project-card" style="border: 1px solid #052e16; background: rgba(34,197,94,0.04);">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="color: #22c55e;">Robo Stack</h4>
+        <span class="project-badge" style="background: #052e16; color: #4ade80;">SPRINT 4</span>
+      </div>
+      <p style="color: #777;">Shared infra · AWS + K3s + CI/CD</p>
+      <p style="color: #555; font-size: 9px;">Towers: Engineer, Architect · Repo: robo-stack</p>
+    </div>
+    <div class="project-card" style="border: 2px solid #0891b2; background: rgba(6,182,212,0.04);">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="color: #22d3ee;">Alistair Prime</h4>
+        <span class="project-badge" style="background: #0a1a1a; color: #22d3ee;">5 LAYERS BUILT</span>
+      </div>
+      <p style="color: #777;">Cognitive Runtime · Orchestration core for all towers</p>
+      <p style="color: #555; font-size: 9px;">Towers: Architect, Builder, Engineer · Repo: alistars-stack</p>
+    </div>
+    <div class="project-card" style="border: 1px solid #3b0764; background: rgba(139,92,246,0.04); border-style: dashed;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="color: #a78bfa;">Content Ops</h4>
+        <span class="project-badge" style="background: #3b0764; color: #c084fc;">SPRINT 0</span>
+      </div>
+      <p style="color: #777;">Content Refinery · Capture → Publish</p>
+      <p style="color: #555; font-size: 9px;">Towers: Architect, Builder · Repo: content-ops · Blocked</p>
+    </div>
+  </div>
+
+  <!-- ===== FOUNDATION ===== -->
+  <div class="section-label" style="margin-top: 24px;">Foundation — Yeti Knowledge Systems (YKS)</div>
+  <div class="foundation">
+    <h4>YKS Platform & Infrastructure</h4>
+    <p>Shared services that all towers and projects build on</p>
+    <div class="infra-tags">
+      <span class="infra-tag it-active">AWS VPC + EC2 ✓</span>
+      <span class="infra-tag it-active">GitHub (5 repos) ✓</span>
+      <span class="infra-tag it-active">CI/CD Pipelines ✓</span>
+      <span class="infra-tag it-active">WordPress CMS ✓</span>
+      <span class="infra-tag it-active">SQLite Memory ✓</span>
+      <span class="infra-tag it-new">Alistair Prime Runtime</span>
+      <span class="infra-tag it-new">Unix Socket IPC (AD-0011)</span>
+      <span class="infra-tag it-partial">K3s Cluster (YAML only)</span>
+      <span class="infra-tag it-missing">Monitoring ✗</span>
+      <span class="infra-tag it-missing">Container Registry ✗</span>
+      <span class="infra-tag it-missing">Secrets Mgmt ✗</span>
+      <span class="infra-tag it-missing">Security Hardening ✗</span>
+    </div>
+  </div>
+
+  <!-- ===== ADR TABLE ===== -->
+  <div class="adr-section">
+    <h4>Architecture Decision Register — AD-0001 through AD-0015</h4>
+    <table class="adr-table">
+      <thead>
+        <tr><th>ID</th><th>Date</th><th>Decision</th><th>Project</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="adr-id">AD-0001</td><td>2026-03-07</td><td>WordPress.com as CMS/hosting platform</td><td><span class="adr-project adr-p-markdown">The Markdown</span></td><td>ACCEPTED</td></tr>
+        <tr><td class="adr-id">AD-0002</td><td>2026-03-07</td><td>WP RSS Aggregator for feed ingest</td><td><span class="adr-project adr-p-markdown">The Markdown</span></td><td>ACCEPTED</td></tr>
+        <tr><td class="adr-id">AD-0003</td><td>2026-03-07</td><td>6-layer architecture (Data/Ingest/AI/Publish/Orchestration/Monitoring)</td><td><span class="adr-project adr-p-markdown">The Markdown</span></td><td>ACCEPTED</td></tr>
+        <tr><td class="adr-id">AD-0004</td><td>2026-03-07</td><td>Multi-platform social API integration</td><td><span class="adr-project adr-p-markdown">The Markdown</span></td><td>ACCEPTED</td></tr>
+        <tr><td class="adr-id">AD-0005</td><td>2026-03-07</td><td>Claude API for content scoring and reformatting</td><td><span class="adr-project adr-p-markdown">The Markdown</span></td><td>ACCEPTED</td></tr>
+        <tr><td class="adr-id">AD-0006</td><td>2026-03-07</td><td>GitLab Premium for version control and CI/CD</td><td><span class="adr-project adr-p-bsw">Build Stack</span></td><td>ACCEPTED</td></tr>
+        <tr><td class="adr-id">AD-0007</td><td>2026-03-07</td><td>Squarespace DNS → WordPress.com hosting</td><td><span class="adr-project adr-p-jk">justin-kuiper.com</span></td><td>ACCEPTED</td></tr>
+        <tr><td class="adr-id">AD-0008</td><td>2026-03-07</td><td>GitLab Pages for dev/staging environment</td><td><span class="adr-project adr-p-jk">justin-kuiper.com</span></td><td>ACCEPTED</td></tr>
+        <tr><td class="adr-id">AD-0009</td><td>2026-03-08</td><td>Local-first persistence with sync to Drive + GitLab</td><td><span class="adr-project adr-p-all">ALL</span></td><td>ACCEPTED</td></tr>
+        <tr><td class="adr-id">AD-0010</td><td>2026-03-08</td><td>Four-function AI team (Overwatch/Taskmaster/Foreman/Developer)</td><td><span class="adr-project adr-p-all">ALL</span></td><td>ACCEPTED</td></tr>
+        <tr class="adr-new"><td class="adr-id">AD-0011</td><td>2026-03-23</td><td>Unix socket for task submission — local IPC, no network exposure</td><td><span class="adr-project adr-p-prime">Alistair Prime</span></td><td>ACCEPTED</td></tr>
+        <tr class="adr-new"><td class="adr-id">AD-0012</td><td>2026-03-23</td><td>Minimal command set (help/status/memory/exit) with extensible registry</td><td><span class="adr-project adr-p-prime">Alistair Prime</span></td><td>ACCEPTED</td></tr>
+        <tr class="adr-new"><td class="adr-id">AD-0013</td><td>2026-03-23</td><td>Simple 3-state task lifecycle: pending → running → done</td><td><span class="adr-project adr-p-prime">Alistair Prime</span></td><td>ACCEPTED</td></tr>
+        <tr class="adr-new"><td class="adr-id">AD-0014</td><td>2026-03-23</td><td>SQLite + PVC for K3s persistence — config-driven backend swap</td><td><span class="adr-project adr-p-prime">Alistair Prime</span></td><td>ACCEPTED</td></tr>
+        <tr class="adr-new"><td class="adr-id">AD-0015</td><td>2026-03-23</td><td>Hybrid NLP model source — Claude API default, self-hosted fallback</td><td><span class="adr-project adr-p-prime">Alistair Prime</span></td><td>ACCEPTED</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== MENTORSHIP CALLOUT ===== -->
+  <div style="margin-top: 20px; width: 100%; max-width: 1200px; padding: 14px 20px; border: 1px solid #1e3a5f; border-radius: 8px; background: rgba(96,165,250,0.04); display: flex; gap: 16px; align-items: center;">
+    <div style="font-size: 28px;">&#x1F393;</div>
+    <div>
+      <h4 style="color: #60a5fa; font-size: 13px; margin-bottom: 2px;">Mentorship Track</h4>
+      <p style="color: #666; font-size: 11px;">This entire org structure doubles as a technology mentorship environment. Each tower is a learning station — rotate through Architecture, Building, Editorial, Creative, and Engineering, working alongside AI agents in real production workflows.</p>
+    </div>
+  </div>
+
+  <!-- ===== LEGEND ===== -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot ld-active"></div> Active</div>
+    <div class="legend-item"><div class="legend-dot ld-partial"></div> Partial</div>
+    <div class="legend-item"><div class="legend-dot ld-planned"></div> Planned</div>
+    <div class="legend-item"><div class="legend-dot ld-concept"></div> Needs Definition</div>
+    <div class="legend-item"><div class="legend-dot ld-new"></div> New (This Sprint)</div>
+  </div>
+
+  <p style="color: #333; font-size: 10px; margin-top: 16px; text-align: center;">Agentics Architecture + Org Chart v2 · 2026-03-23 · Includes Alistair Prime cognitive layer + AD-0011–AD-0015</p>
+
+</div>
+
+</body>
+</html>
