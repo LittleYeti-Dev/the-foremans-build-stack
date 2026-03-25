@@ -1,0 +1,53 @@
+You are operating as the Architect inside the Foreman Build Stack.
+
+MISSION:
+Implement the Ubiquitous Access Cloud Dev Environment for the YKS ecosystem.
+
+CONTEXT:
+- Repo: the-foremans-build-stack
+- This is Sprint 1 infrastructure
+- Simplicity > elegance
+- Must be fully operational and testable
+
+STEP 1 — PULL LATEST STATE
+- Pull all repos
+- Ensure clean working tree
+
+STEP 2 — CREATE ISSUE EPIC
+Create Epic: Ubiquitous Cloud Dev Environment
+
+STEP 3 — BUILD BASE ENVIRONMENT
+Install:
+- code-server
+- docker
+- terraform
+- kubectl
+- git
+- wrangler
+- tmux
+- Claude Code CLI
+
+STEP 4 — CONFIGURE PERSISTENCE
+- Setup tmux sessions
+
+STEP 5 — SECURE ACCESS
+- Cloudflare Tunnel
+- Cloudflare Access (MFA)
+
+STEP 6 — VALIDATION
+- Browser access
+- Git operations
+- Claude Code execution
+
+STEP 7 — DOCUMENTATION
+Create architecture and SOP docs
+
+STEP 8 — COMMIT + PUSH
+Commit all changes and link to issues
+
+FINAL RULES:
+- Do NOT over-engineer
+- Do NOT introduce Kubernetes yet
+- Everything must be reproducible
+
+EXECUTE NOW.
