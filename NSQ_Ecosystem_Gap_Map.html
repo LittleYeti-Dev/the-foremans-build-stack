@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NSQ Ecosystem — Gap Map & Reconciliation Register</title>
+<style>
+  :root {
+    --bg: #070b14;
+    --surface: #0b101a;
+    --card: #101826;
+    --border: #1e293b;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+    --blue: #2F6BFF;
+    --blue-glow: rgba(47,107,255,0.15);
+    --cyan: #22d3ee;
+    --green: #22c55e;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --purple: #a855f7;
+    --orange: #f97316;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; }
+  .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+  /* Header */
+  .doc-header {
+    background: linear-gradient(135deg, #081120, #0b1730, #101626);
+    border: 1px solid rgba(47,107,255,0.3);
+    border-radius: 1.5rem;
+    padding: 2rem 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 0 60px rgba(47,107,255,0.08);
+  }
+  .doc-header .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.25em; color: rgba(34,211,238,0.8); }
+  .doc-header h1 { font-size: 2.2rem; font-weight: 700; margin: 0.3rem 0 0.5rem; }
+  .doc-header .meta { font-size: 0.85rem; color: var(--text-muted); }
+  .doc-header .meta strong { color: var(--text); }
+  .doc-header .chips { display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap; }
+  .chip { padding: 0.5rem 1rem; border-radius: 1rem; border: 1px solid var(--border); background: rgba(0,0,0,0.3); font-size: 0.75rem; }
+  .chip .chip-label { text-transform: uppercase; letter-spacing: 0.2em; color: var(--text-dim); font-size: 0.6rem; display: block; }
+  .chip .chip-value { color: var(--text); font-weight: 600; }
+
+  /* Sections */
+  .section { margin-bottom: 2.5rem; }
+  .section-title {
+    font-size: 1.4rem; font-weight: 700; color: var(--blue);
+    border-bottom: 2px solid rgba(47,107,255,0.3);
+    padding-bottom: 0.5rem; margin-bottom: 1rem;
+  }
+  .section-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem; }
+
+  /* Executive Summary */
+  .exec-summary {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+  }
+  .exec-summary p { margin-bottom: 0.75rem; font-size: 0.95rem; }
+  .exec-summary .highlight { color: var(--cyan); font-weight: 600; }
+  .exec-summary .warning { color: var(--amber); font-weight: 600; }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; border-radius: 1rem; border: 1px solid var(--border); margin-bottom: 1.5rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th {
+    background: #0b1730;
+    color: var(--cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 2px solid var(--blue);
+    position: sticky; top: 0;
+  }
+  td { padding: 0.7rem 1rem; border-bottom: 1px solid rgba(30,41,59,0.5); vertical-align: top; }
+  tr:nth-child(even) td { background: rgba(15,23,42,0.4); }
+  tr:hover td { background: rgba(47,107,255,0.05); }
+  .req-name { font-weight: 600; color: var(--text); min-width: 180px; }
+
+  /* Status badges */
+  .status {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+  .status-built { background: #166534; color: #bbf7d0; }
+  .status-partial { background: #9a3412; color: #fed7aa; }
+  .status-designed { background: #1e40af; color: #bfdbfe; }
+  .status-documented { background: #6b21a8; color: #e9d5ff; }
+  .status-not-started { background: #991b1b; color: #fecaca; }
+  .status-live { background: #15803d; color: #dcfce7; border: 1px solid #22c55e; }
+  .status-drift { background: #92400e; color: #fef3c7; border: 1px solid #f59e0b; }
+  .status-high { background: #991b1b; color: #fecaca; }
+  .status-medium { background: #92400e; color: #fef3c7; }
+  .status-low { background: #1e40af; color: #bfdbfe; }
+
+  /* Problem Point cards */
+  .problem-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1rem;
+  }
+  .problem-card h3 { color: var(--blue); font-size: 1.1rem; margin-bottom: 0.75rem; }
+  .problem-card .field { margin-bottom: 0.5rem; font-size: 0.9rem; }
+  .problem-card .field-label { font-weight: 700; color: var(--cyan); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; }
+  .problem-card .decision {
+    margin-top: 0.75rem;
+    padding: 0.6rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+  .decision-build { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #86efac; }
+  .decision-design { background: rgba(47,107,255,0.15); border: 1px solid rgba(47,107,255,0.3); color: #93c5fd; }
+  .decision-defer { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); color: #fde68a; }
+  .decision-now { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+
+  /* Phase cards */
+  .phase-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--blue);
+    border-radius: 0 1rem 1rem 0;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .phase-card h3 { color: var(--text); font-size: 1rem; margin-bottom: 0.25rem; }
+  .phase-card .timeline { color: var(--cyan); font-size: 0.8rem; font-weight: 600; }
+  .phase-card .scope { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem; }
+  .phase-card .complexity { margin-top: 0.5rem; }
+
+  /* Actions */
+  .action-list { counter-reset: actions; }
+  .action-item {
+    counter-increment: actions;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+  .action-item::before {
+    content: counter(actions);
+    background: var(--blue);
+    color: white;
+    font-weight: 700;
+    font-size: 0.7rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* Skipjack warning */
+  .skipjack-bar {
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    color: #fde68a;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+  }
+
+  /* Defer list */
+  .defer-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  .defer-item .defer-label { color: var(--amber); font-weight: 700; font-size: 0.85rem; }
+  .defer-item .defer-desc { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.25rem; }
+
+  /* Footer */
+  .doc-footer {
+    border-top: 2px solid rgba(47,107,255,0.3);
+    padding-top: 1rem;
+    margin-top: 3rem;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+  }
+
+  @media print {
+    body { background: white; color: #1a1a1a; }
+    .doc-header { background: #f1f5f9; border-color: #2F6BFF; }
+    th { background: #1e293b; color: white; }
+    td { border-color: #e2e8f0; }
+    .problem-card, .phase-card, .action-item, .defer-item { border-color: #e2e8f0; background: #f8fafc; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="doc-header">
+    <div class="label">NSQ Ecosystem &mdash; Foreman Architecture Authority</div>
+    <h1>Gap Map &amp; Reconciliation Register</h1>
+    <div class="meta">
+      <strong>Document ID:</strong> NSQ-GAP-001 &nbsp;|&nbsp;
+      <strong>Date:</strong> 2026-03-26 &nbsp;|&nbsp;
+      <strong>Author:</strong> Foreman &nbsp;|&nbsp;
+      <strong>Governance:</strong> HGC&sup3;AE&sup2; Framework + Skipjack Protocol
+    </div>
+    <div class="chips">
+      <div class="chip"><span class="chip-label">SSOT Reqs</span><span class="chip-value">20 mapped</span></div>
+      <div class="chip"><span class="chip-label">Repos</span><span class="chip-value">10 inventoried</span></div>
+      <div class="chip"><span class="chip-label">Drift Items</span><span class="chip-value">8 flagged</span></div>
+      <div class="chip"><span class="chip-label">Build Phases</span><span class="chip-value">5 proposed</span></div>
+      <div class="chip"><span class="chip-label">Pipeline</span><span class="chip-value" style="color:#22c55e">LIVE</span></div>
+    </div>
+  </div>
+
+  <div class="skipjack-bar">
+    &#x26A0; SKIPJACK PROTOCOL REMINDER &mdash; This document reconciles doctrine with reality. If the as-built state differs from the design, the design is wrong, not the build. No silent continuation.
+  </div>
+
+  <!-- 1. EXECUTIVE SUMMARY -->
+  <div class="section">
+    <div class="section-title">1. Executive Summary</div>
+    <div class="exec-summary">
+      <p>This document reconciles the NSQ Ecosystem SSOT doctrine (NSQ-ECO repository, 2026-03-25) against all existing assets across the <span class="highlight">10-repository GitHub portfolio</span>. It maps every SSOT requirement to current state, identifies gaps, flags architecture drift, and proposes a phased build sequence.</p>
+      <p><strong>Key finding:</strong> Significant assets exist but are disconnected. The content pipeline is <span class="highlight">LIVE</span> (Pipeline Bot committed today at 0840 ET). The website has 6 sprints of work on Cloudflare Pages via Hugo. RoboStack has real K3s infrastructure across 4 sprints. Alistair Prime has socket IPC foundations. But there is <span class="warning">no ACI cockpit, no GCOL control plane, no Skipjack enforcement, and no Code Lab</span>. The pieces exist &mdash; the orchestration layer connecting them does not.</p>
+      <p><strong>Architecture drift detected:</strong> The Decision Register shows TD-001 (platform) and TD-005 (SSG) as OPEN, but <span class="warning">Cloudflare Pages + Hugo are already deployed and running in production</span>. Three architecture decisions (AD-0001, AD-0002, AD-0007) need status updates to match as-built state.</p>
+      <p><strong>Source of truth:</strong> This gap map is now the governing reconciliation document for the NSQ Ecosystem. All SSOT requirements from NSQ-ECO are accounted for. All existing assets are inventoried. Build sequence derives from this baseline.</p>
+    </div>
+  </div>
+
+  <!-- 2. SSOT REQUIREMENT GAP MAP -->
+  <div class="section">
+    <div class="section-title">2. SSOT Requirement Gap Map</div>
+    <div class="section-desc">Every SSOT requirement mapped to current state, gap assessment, and proposed build phase.</div>
+
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>SSOT Requirement</th>
+          <th>Status</th>
+          <th>What Exists</th>
+          <th>Gap</th>
+          <th>Build Phase</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- ACI -->
+        <tr>
+          <td class="req-name">ACI: Morning Command Deck</td>
+          <td><span class="status status-not-started">Not Started</span></td>
+          <td>Tabletop mock (React). non-sequitur-web Sprint 1-3 built website pages, not the ACI cockpit.</td>
+          <td>No functional command deck. No governance init. No My Day surface. Mock exists but zero backend.</td>
+          <td><strong>Phase 1</strong> &mdash; core ACI shell</td>
+        </tr>
+        <tr>
+          <td class="req-name">ACI: Persona-Sensitive Command Lane</td>
+          <td><span class="status status-not-started">Not Started</span></td>
+          <td>9 personas defined in SSOT and mock. Currently each persona is a separate Cowork project prompt.</td>
+          <td>No persona routing in code. No context switching. No command lane.</td>
+          <td><strong>Phase 1</strong> &mdash; persona selector + context switch</td>
+        </tr>
+        <tr>
+          <td class="req-name">ACI: Taskmaster Persona Support</td>
+          <td><span class="status status-documented">Documented</span></td>
+          <td>Taskmaster exists as Cowork persona. Gunther repo (8 commits). Open arch decision on runtime.</td>
+          <td>No Taskmaster command surface. No procedural mode toggle. Runtime decision unresolved.</td>
+          <td><strong>Phase 2</strong> &mdash; after ACI shell</td>
+        </tr>
+        <tr>
+          <td class="req-name">ACI: Clickable Domains (No Buttons)</td>
+          <td><span class="status status-not-started">Not Started</span></td>
+          <td>v2 SSOT requirement. Mock still uses some button elements.</td>
+          <td>No hover/click/deep-click interaction model. No visual affordances (glow, motion, border shift).</td>
+          <td><strong>Phase 2</strong> &mdash; UX refinement pass</td>
+        </tr>
+        <tr>
+          <td class="req-name">ACI: Live Ops Status Board</td>
+          <td><span class="status status-not-started">Not Started</span></td>
+          <td>SSOT addendum. Mock shows status chips but not the compact ops pulse.</td>
+          <td>No live ops surface. No progress indicators. No click-through to operations view.</td>
+          <td><strong>Phase 2</strong> &mdash; requires GCOL telemetry</td>
+        </tr>
+        <!-- GCOL -->
+        <tr>
+          <td class="req-name">GCOL: Tower-to-Tower Routing</td>
+          <td><span class="status status-not-started">Not Started</span></td>
+          <td>Tower model documented in SSOT. Currently human-mediated via Cowork sessions.</td>
+          <td>No automated routing. No governed pathways in code. No tower boundaries enforced.</td>
+          <td><strong>Phase 3</strong> &mdash; control plane foundation</td>
+        </tr>
+        <tr>
+          <td class="req-name">GCOL: Human Checkpoints</td>
+          <td><span class="status status-not-started">Not Started</span></td>
+          <td>Approval patterns shown in mock. Executive mediation model documented.</td>
+          <td>No checkpoint enforcement. No approval gates in code. No escalation pathways.</td>
+          <td><strong>Phase 3</strong> &mdash; checkpoint framework</td>
+        </tr>
+        <tr>
+          <td class="req-name">GCOL: Operational Visibility</td>
+          <td><span class="status status-not-started">Not Started</span></td>
+          <td>Mock shows 6-step flow. No implementation.</td>
+          <td>No state tracking. No telemetry. No under-the-hood visibility.</td>
+          <td><strong>Phase 3</strong> &mdash; state machine + telemetry</td>
+        </tr>
+        <tr>
+          <td class="req-name">GCOL: Skipjack Protocol (No Silent Continuation)</td>
+          <td><span class="status status-documented">Documented</span></td>
+          <td>Fully documented in SSOT. Referenced in mock amber warning. Not enforced anywhere.</td>
+          <td>Zero runtime enforcement. No reconciliation checkpoints. No uncertainty signaling.</td>
+          <td><strong>Phase 2</strong> &mdash; Skipjack middleware (cross-cutting)</td>
+        </tr>
+        <!-- UXL -->
+        <tr>
+          <td class="req-name">UXL: NSQ Website (Public Surface)</td>
+          <td><span class="status status-partial">Partially Built</span></td>
+          <td>non-sequitur-web: 52 commits, 6 sprints. Hugo + Cloudflare Pages. Homepage, nav, build page, content lab kanban, agentics, wave viz v3, comment system, case study framework.</td>
+          <td>Missing: full content migration, distribution integration, email capture, CTA system.</td>
+          <td><strong>Active</strong> &mdash; continue sprint execution</td>
+        </tr>
+        <tr>
+          <td class="req-name">UXL: Ubiquitous Interface</td>
+          <td><span class="status status-not-started">Not Started</span></td>
+          <td>SSOT requires desktop, mobile, tablet, terminal. Hugo site has responsive CSS only.</td>
+          <td>No terminal interface. No dedicated mobile/tablet ACI optimization.</td>
+          <td><strong>Phase 4+</strong> &mdash; after desktop ACI functional</td>
+        </tr>
+        <!-- Unified Backbone -->
+        <tr>
+          <td class="req-name">Unified Backbone: Content Lab</td>
+          <td><span class="status status-live">LIVE</span></td>
+          <td>AD-0025-0027 ACCEPTED. Pipeline: Signal &rarr; Vector &rarr; Wrap &rarr; Drop. GitHub Actions workflows. <strong>Pipeline Bot running LIVE</strong> (committed today 0840 ET). Sprint 2 kanban surface.</td>
+          <td>Content Lab UI partial. Editorial Board modes not fully implemented. Distribution manual only.</td>
+          <td><strong>Active</strong> &mdash; continue pipeline buildout</td>
+        </tr>
+        <tr>
+          <td class="req-name">Unified Backbone: Code Lab</td>
+          <td><span class="status status-not-started">Not Started</span></td>
+          <td>Referenced in mock. No architecture decisions. No design.</td>
+          <td>Entirely missing. No intake, no pipeline, no convergence with Content Lab.</td>
+          <td><strong>Phase 3</strong> &mdash; design first</td>
+        </tr>
+        <tr>
+          <td class="req-name">Unified Backbone: Convergent Flow</td>
+          <td><span class="status status-designed">Designed</span></td>
+          <td>SSOT defines: framing &rarr; staging &rarr; build &rarr; QA &rarr; legal &rarr; assembly &rarr; approval &rarr; release &rarr; iteration. Content pipeline partially implements this.</td>
+          <td>Code Lab side missing. Legal/compliance/finance branches not built. Workbench not built.</td>
+          <td><strong>Phase 3</strong> &mdash; convergence architecture</td>
+        </tr>
+        <!-- Executive Model -->
+        <tr>
+          <td class="req-name">Executive Mediation Model</td>
+          <td><span class="status status-documented">Documented</span></td>
+          <td>Fully documented. User = executive. Alistair = interpretive. Gunther = procedural. Cross-observation required.</td>
+          <td>Not enforced in code. No mediation interface. No cross-observation mechanism.</td>
+          <td><strong>Phase 2</strong> &mdash; builds on ACI persona routing</td>
+        </tr>
+        <!-- Alistair -->
+        <tr>
+          <td class="req-name">Alistair Prime (Interpretive Layer)</td>
+          <td><span class="status status-partial">Partially Built</span></td>
+          <td>alistars-stack (17 commits): Socket IPC, command registry, task lifecycle, SQLite, hybrid NLP design. 20+ open issues in backlog.</td>
+          <td>Orchestration layer not built. No ACI-to-Alistair bridge. 20+ open issues.</td>
+          <td><strong>Phase 3</strong> &mdash; after ACI + GCOL foundation</td>
+        </tr>
+        <!-- RoboStack -->
+        <tr>
+          <td class="req-name">RoboStack (Execution Substrate)</td>
+          <td><span class="status status-built">Built</span></td>
+          <td>robo-stack (45 commits, 4 sprints): K3s, monitoring, CI/CD, multi-env, MITRE threat model. Real deployed infrastructure.</td>
+          <td>Not integrated with ACI. No command-to-execution pathway. Standalone.</td>
+          <td><strong>Phase 3</strong> &mdash; ACI &rarr; RoboStack bridge</td>
+        </tr>
+        <!-- Governance -->
+        <tr>
+          <td class="req-name">Standup = Governance Initialization</td>
+          <td><span class="status status-not-started">Not Started</span></td>
+          <td>Morning Brief section in mock. Standup concept in SSOT.</td>
+          <td>No governance init flow. No standup automation. No intent/constraint capture.</td>
+          <td><strong>Phase 2</strong> &mdash; part of Morning Command Deck</td>
+        </tr>
+        <!-- Tabletop -->
+        <tr>
+          <td class="req-name">Tabletop Design Requirement</td>
+          <td><span class="status status-partial">Partially Built</span></td>
+          <td>React tabletop mock exists. Walkthrough runbook in docs/.</td>
+          <td>Mock is static. No stepwise walkthrough. No iterative refinement loop.</td>
+          <td><strong>Phase 1</strong> &mdash; make mock interactive</td>
+        </tr>
+        <!-- Workbench -->
+        <tr>
+          <td class="req-name">Workbench Layer</td>
+          <td><span class="status status-not-started">Not Started</span></td>
+          <td>SSOT requirement: temporary staging, cross-persona accessible. Referenced in mock.</td>
+          <td>No workbench. No staging area. No iteration-without-commitment pattern.</td>
+          <td><strong>Phase 3</strong> &mdash; after backbone convergence</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- 3. REPOSITORY INVENTORY -->
+  <div class="section">
+    <div class="section-title">3. Repository Inventory</div>
+    <div class="section-desc">All 10 repositories in LittleYeti-Dev mapped to their NSQ Ecosystem role.</div>
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Repository</th><th>Language</th><th>Commits</th><th>Description</th><th>Ecosystem Role</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="req-name">non-sequitur-web</td><td>HTML/Py/CSS/JS</td><td>52</td><td>Hugo site + content pipeline. 6 sprints. Cloudflare Pages. Pipeline Bot LIVE.</td><td>UXL, Content Lab, Distribution</td></tr>
+        <tr><td class="req-name">the-markdown</td><td>PHP</td><td>60</td><td>Original blog on WordPress. Legacy system.</td><td>Legacy &mdash; superseded by non-sequitur-web</td></tr>
+        <tr><td class="req-name">robo-stack</td><td>Shell</td><td>45</td><td>Hybrid AI dev stack. K3s, monitoring, CI/CD, multi-env. MITRE threat model.</td><td>RoboStack (execution substrate)</td></tr>
+        <tr><td class="req-name">alistars-stack</td><td>Python</td><td>17</td><td>Alistair Prime foundation. Socket IPC, command registry, task lifecycle, SQLite.</td><td>Alistair Prime (interpretive layer)</td></tr>
+        <tr><td class="req-name">the-foremans-build-stack</td><td>HTML</td><td>15</td><td>Architecture docs, project registry, control plane docs. This workspace.</td><td>Build Stack Workshop (meta)</td></tr>
+        <tr><td class="req-name">content-ops</td><td>N/A</td><td>10</td><td>Content operations. Feed Crusher. 6 open issues incl. blocker.</td><td>Content Lab operations</td></tr>
+        <tr><td class="req-name">gunther</td><td>Python</td><td>8</td><td>Gunther procedural stack.</td><td>GCOL (procedural layer)</td></tr>
+        <tr><td class="req-name">NSQ-ECO</td><td>Markdown</td><td>7</td><td>Doctrine and requirements. SSOT files. Architect-builder prompt.</td><td>Governance doctrine</td></tr>
+        <tr><td class="req-name">yks-hub</td><td>PHP</td><td>20</td><td>Central ops hub. Cross-project issue tracking.</td><td>Cross-project operations</td></tr>
+        <tr><td class="req-name">Agentics-Alistair-Prime</td><td>N/A</td><td>1</td><td>Alistair Prime agentics. 20 open issues. Scaffolding only.</td><td>Alistair Prime (agentics)</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- 4. ARCHITECTURE DRIFT REGISTER -->
+  <div class="section">
+    <div class="section-title">4. Architecture Drift Register</div>
+    <div class="section-desc">Decisions where documented state no longer matches as-built state. Require immediate reconciliation.</div>
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Decision</th><th>Doc Status</th><th>Actual Status</th><th>Reconciliation Action</th><th>Priority</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="req-name">TD-001</td><td>Platform choice</td>
+          <td><span class="status status-drift">OPEN</span></td>
+          <td><span class="status status-built">Resolved in Code</span></td>
+          <td>Cloudflare Pages + Hugo deployed. wrangler.toml and deploy workflow in repo. <strong>Close TD-001 as Cloudflare.</strong></td>
+          <td><span class="status status-high">HIGH</span></td>
+        </tr>
+        <tr>
+          <td class="req-name">TD-005</td><td>SSG choice</td>
+          <td><span class="status status-drift">OPEN</span></td>
+          <td><span class="status status-built">Resolved in Code</span></td>
+          <td>hugo.toml in repo root. Hugo is the SSG. <strong>Close TD-005 as Hugo.</strong></td>
+          <td><span class="status status-high">HIGH</span></td>
+        </tr>
+        <tr>
+          <td class="req-name">TD-003</td><td>DNS provider</td>
+          <td><span class="status status-drift">OPEN</span></td>
+          <td><span class="status status-partial">Partially Resolved</span></td>
+          <td>Cloudflare Pages deployed but DNS may still be on Squarespace. Verify and close.</td>
+          <td><span class="status status-medium">MEDIUM</span></td>
+        </tr>
+        <tr>
+          <td class="req-name">TD-004</td><td>Content migration</td>
+          <td><span class="status status-drift">OPEN</span></td>
+          <td><span class="status status-partial">In Progress</span></td>
+          <td>Pipeline Bot running. Content directory populated. Strategy is incremental via pipeline.</td>
+          <td><span class="status status-medium">MEDIUM</span></td>
+        </tr>
+        <tr>
+          <td class="req-name">AD-0001</td><td>WordPress as CMS</td>
+          <td><span class="status status-drift">Under Review</span></td>
+          <td><span class="status status-not-started">Superseded</span></td>
+          <td>Cloudflare + Hugo is the platform. WordPress is legacy. <strong>Close AD-0001 as SUPERSEDED by AD-0016.</strong></td>
+          <td><span class="status status-high">HIGH</span></td>
+        </tr>
+        <tr>
+          <td class="req-name">AD-0002</td><td>WP RSS Aggregator</td>
+          <td><span class="status status-built">Accepted</span></td>
+          <td><span class="status status-not-started">Superseded</span></td>
+          <td>Pipeline Bot on GitHub Actions replaces WP RSS Aggregator. New ingest is live.</td>
+          <td><span class="status status-medium">MEDIUM</span></td>
+        </tr>
+        <tr>
+          <td class="req-name">AD-0007</td><td>Squarespace DNS</td>
+          <td><span class="status status-built">Superseded</span></td>
+          <td><span class="status status-built">Resolved</span></td>
+          <td>DNS on Cloudflare via Google Domains integration. <strong>CLOSED 2026-03-26.</strong></td>
+          <td><span class="status status-built">DONE</span></td>
+        </tr>
+        <tr>
+          <td class="req-name">AD-0010</td><td>Four-function AI team</td>
+          <td><span class="status status-built">Accepted</span></td>
+          <td><span class="status status-drift">Expanded</span></td>
+          <td>SSOT defines 9+ tower personas. AD-0010 describes 4 functions. Needs update to full tower model.</td>
+          <td><span class="status status-low">LOW</span></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- 5. PROBLEM-POINT REGISTER -->
+  <div class="section">
+    <div class="section-title">5. Problem-Point Register</div>
+    <div class="section-desc">Structured analysis per the architect-builder prompt format: Problem, Current State, Missing, Proposed Approach, Cost/Complexity, Decision.</div>
+
+    <div class="problem-card">
+      <h3>5.1 ACI (Agentics Command Interface)</h3>
+      <div class="field"><span class="field-label">Problem:</span> No functional command interface exists. The user operates through multiple disconnected Cowork session personas.</div>
+      <div class="field"><span class="field-label">Current State:</span> React tabletop mock. non-sequitur-web website pages (Sprint 1-3). 9 personas defined in SSOT.</div>
+      <div class="field"><span class="field-label">Missing:</span> Functional ACI shell. Persona routing engine. Command lane with execution. Morning Command Deck with live data. Live ops status board.</div>
+      <div class="field"><span class="field-label">Proposed Approach:</span> Build ACI as a standalone React application (separate from Hugo site). Start with persona selector + command lane + static Morning Brief. Wire to pipeline data for live status. Deploy on Cloudflare Pages at a subdomain (e.g., aci.justin-kuiper.com).</div>
+      <div class="field"><span class="field-label">Cost / Complexity:</span> MEDIUM. React + Tailwind + API stubs. 2-week MVP sprint. Higher complexity from persona context switching logic.</div>
+      <div class="decision decision-build">DECISION: BUILD NOW. ACI is the center of the ecosystem per SSOT. Nothing else works without it.</div>
+    </div>
+
+    <div class="problem-card">
+      <h3>5.2 GCOL (Control Plane)</h3>
+      <div class="field"><span class="field-label">Problem:</span> Tower coordination is entirely human-mediated. No automated routing, checkpoint enforcement, or operational visibility.</div>
+      <div class="field"><span class="field-label">Current State:</span> Tower model documented. Gunther repo (8 commits). Alistair Prime has socket IPC. Content pipeline has GitHub Actions.</div>
+      <div class="field"><span class="field-label">Missing:</span> Tower routing engine. State machine for GCOL flow. Checkpoint framework. Cross-observation mechanism. Telemetry/visibility layer.</div>
+      <div class="field"><span class="field-label">Proposed Approach:</span> Design GCOL as a lightweight state machine between ACI and execution layers. Use 6-step flow from mock as state model. Events emitted at each transition for ops status board.</div>
+      <div class="field"><span class="field-label">Cost / Complexity:</span> HIGH. State machine design, event system, multi-backend integration. 4-week sprint minimum.</div>
+      <div class="decision decision-design">DECISION: DESIGN NOW, BUILD IN PHASE 3. Get the state machine architecture right before implementing.</div>
+    </div>
+
+    <div class="problem-card">
+      <h3>5.3 Skipjack Protocol Enforcement</h3>
+      <div class="field"><span class="field-label">Problem:</span> Skipjack is doctrine but has zero runtime enforcement anywhere in the portfolio.</div>
+      <div class="field"><span class="field-label">Current State:</span> Fully documented in SSOT. Referenced in mock. Not implemented.</div>
+      <div class="field"><span class="field-label">Missing:</span> Validation middleware. Reconciliation checkpoints. Uncertainty signaling. Stale-state detection.</div>
+      <div class="field"><span class="field-label">Proposed Approach:</span> Implement as cross-cutting middleware. Start with content pipeline as proving ground. Require validation at every GitHub Actions workflow step. Extend to ACI and GCOL.</div>
+      <div class="field"><span class="field-label">Cost / Complexity:</span> MEDIUM. Pattern is straightforward (validate-or-halt). Challenge is consistent application.</div>
+      <div class="decision decision-build">DECISION: BUILD IN PHASE 2. Governance hard rule. Must be enforced before GCOL goes live.</div>
+    </div>
+
+    <div class="problem-card">
+      <h3>5.4 Code Lab</h3>
+      <div class="field"><span class="field-label">Problem:</span> Content Lab has architecture and a live pipeline. Code Lab has nothing.</div>
+      <div class="field"><span class="field-label">Current State:</span> Zero. Referenced in mock and SSOT but no architecture decisions, no design, no code.</div>
+      <div class="field"><span class="field-label">Missing:</span> Everything. Intake model. Pipeline stages. Convergence with Content Lab. RoboStack integration.</div>
+      <div class="field"><span class="field-label">Proposed Approach:</span> Design as parallel intake lane converging with Content Lab at backbone. Same stage-as-directory model. RoboStack provides execution. GitHub Actions provides workflow engine.</div>
+      <div class="field"><span class="field-label">Cost / Complexity:</span> HIGH. New subsystem from scratch. Must align with Content Lab patterns.</div>
+      <div class="decision decision-design">DECISION: DESIGN IN PHASE 3. Build after backbone convergence architecture defined.</div>
+    </div>
+
+    <div class="problem-card">
+      <h3>5.5 RoboStack Integration</h3>
+      <div class="field"><span class="field-label">Problem:</span> RoboStack is real infrastructure but completely disconnected from ACI.</div>
+      <div class="field"><span class="field-label">Current State:</span> Standalone. 45 commits, K3s, monitoring, CI/CD, MITRE threat model.</div>
+      <div class="field"><span class="field-label">Missing:</span> ACI-to-RoboStack bridge. Command execution pathway. Status reporting to ops board.</div>
+      <div class="field"><span class="field-label">Proposed Approach:</span> Thin API bridge. ACI sends requests through GCOL routing. RoboStack reports back via webhook. Start simple, evolve to full orchestration.</div>
+      <div class="field"><span class="field-label">Cost / Complexity:</span> MEDIUM. RoboStack already works. The bridge is the new work.</div>
+      <div class="decision decision-build">DECISION: BUILD IN PHASE 3. After ACI and GCOL foundations exist.</div>
+    </div>
+
+    <div class="problem-card">
+      <h3>5.6 Architecture Register Drift</h3>
+      <div class="field"><span class="field-label">Problem:</span> Architecture and Decision Registers do not reflect as-built state. 8 items need reconciliation.</div>
+      <div class="field"><span class="field-label">Current State:</span> See Section 4. TD-001, TD-005, AD-0001, AD-0002, AD-0007, AD-0010 all drifted.</div>
+      <div class="field"><span class="field-label">Missing:</span> Accurate documentation. Register should be single source of truth for technical decisions.</div>
+      <div class="field"><span class="field-label">Proposed Approach:</span> Immediate reconciliation. Update all drifted decisions this session. Standing rule: register updated same-day as any build that resolves a decision.</div>
+      <div class="field"><span class="field-label">Cost / Complexity:</span> LOW. Documentation update only.</div>
+      <div class="decision decision-now">DECISION: DO NOW. This session. Architecture docs must match reality.</div>
+    </div>
+  </div>
+
+  <!-- 6. BUILD SEQUENCE -->
+  <div class="section">
+    <div class="section-title">6. Proposed Build Sequence</div>
+    <div class="section-desc">Phased approach. Each phase depends on the prior. Parallel work within phases encouraged.</div>
+
+    <div class="phase-card" style="border-left-color: #ef4444;">
+      <h3>Phase 1: ACI Shell MVP</h3>
+      <div class="timeline">Weeks 1&ndash;2 &nbsp;|&nbsp; <span class="status status-medium">MEDIUM</span></div>
+      <div class="scope">Convert tabletop mock to functional React app. Persona selector with context switching. Morning Command Deck with static data. Command lane (text input &rarr; action stub). Status chips with live pipeline data. Deploy as standalone surface (separate from Hugo site).</div>
+    </div>
+    <div class="phase-card" style="border-left-color: #f59e0b;">
+      <h3>Phase 2: Governance Layer</h3>
+      <div class="timeline">Weeks 3&ndash;4 &nbsp;|&nbsp; <span class="status status-medium">MEDIUM</span></div>
+      <div class="scope">Skipjack middleware (cross-cutting). Standup/governance init flow. Executive mediation interface. Approval gates (UI + basic state machine). Live ops status board. Clickable domains UX refinement.</div>
+    </div>
+    <div class="phase-card" style="border-left-color: #2F6BFF;">
+      <h3>Phase 3: Control Plane (GCOL)</h3>
+      <div class="timeline">Weeks 5&ndash;8 &nbsp;|&nbsp; <span class="status status-high">HIGH</span></div>
+      <div class="scope">Tower routing engine. GCOL state machine (Intent &rarr; Context &rarr; Routing &rarr; Checkpoint &rarr; Approval &rarr; Package). Alistair Prime bridge (ACI &rarr; socket IPC). RoboStack bridge (ACI &rarr; execution hooks). Code Lab architecture design. Workbench layer. Backbone convergence (Content + Code).</div>
+    </div>
+    <div class="phase-card" style="border-left-color: #22c55e;">
+      <h3>Phase 4: Integration + Polish</h3>
+      <div class="timeline">Weeks 9&ndash;12 &nbsp;|&nbsp; <span class="status status-medium">MEDIUM</span></div>
+      <div class="scope">Ubiquitous interface (mobile/tablet). Content pipeline full automation. Distribution layer automation. Email capture + CTA system. Agent handoff persistence.</div>
+    </div>
+    <div class="phase-card" style="border-left-color: #a855f7;">
+      <h3>Phase 5: Hardening</h3>
+      <div class="timeline">Weeks 13+ &nbsp;|&nbsp; <span class="status status-medium">MEDIUM</span></div>
+      <div class="scope">Skipjack full enforcement across all systems. Security review (Overwatch). Performance optimization. Monitoring and alerting. Documentation update. Terminal interface (Alistair Prime CLI).</div>
+    </div>
+  </div>
+
+  <!-- 7. WHAT TO DEFER -->
+  <div class="section">
+    <div class="section-title">7. What to Defer or Reject</div>
+
+    <div class="defer-item">
+      <div class="defer-label">DEFER &mdash; Ubiquitous Interface (terminal parity)</div>
+      <div class="defer-desc">Terminal access can come through Alistair Prime CLI in Phase 5. Desktop-first, then responsive.</div>
+    </div>
+    <div class="defer-item">
+      <div class="defer-label">DEFER &mdash; Full GCOL Automation</div>
+      <div class="defer-desc">Phase 3 builds the state machine. Full autonomous tower routing is Phase 5+ after governance patterns are proven.</div>
+    </div>
+    <div class="defer-item">
+      <div class="defer-label">DEFER &mdash; NLP-on-top-of-NLP Command Routing</div>
+      <div class="defer-desc">SSOT correctly identifies this as open. MVP command lane is a governed doorway, not a native NLP layer.</div>
+    </div>
+    <div class="defer-item">
+      <div class="defer-label">DEFER &mdash; Legal / Compliance / Finance Branches</div>
+      <div class="defer-desc">Conditional branches in convergent flow. Not needed for MVP.</div>
+    </div>
+    <div class="defer-item">
+      <div class="defer-label">DEFER &mdash; Full Distribution Automation</div>
+      <div class="defer-desc">Phase 1 is manual/Loomly per AD-0021. Pipeline-driven distribution is Phase 3+.</div>
+    </div>
+  </div>
+
+  <!-- 8. IMMEDIATE ACTIONS -->
+  <div class="section">
+    <div class="section-title">8. Immediate Actions (This Session)</div>
+    <div class="action-list">
+      <div class="action-item">Reconcile Architecture Register &mdash; update TD-001, TD-003, TD-004, TD-005, AD-0001, AD-0002, AD-0007, AD-0010 to match as-built state.</div>
+      <div class="action-item">Register this gap map (NSQ-GAP-001) as governing reconciliation document in Build Stack Workshop.</div>
+      <div class="action-item">Create AD-0032: NSQ-ECO as governing doctrine repository. All architecture decisions must reconcile with SSOT requirements.</div>
+      <div class="action-item">Create AD-0033: ACI as standalone React application, separate from Hugo site, deployed on Cloudflare Pages.</div>
+      <div class="action-item">Update Integration Map with new planned integration points: ACI-to-GCOL, ACI-to-Alistair, ACI-to-RoboStack, GCOL-to-towers.</div>
+      <div class="action-item">Log session transcript.</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="doc-footer">
+    <strong>NSQ-GAP-001</strong> &nbsp;|&nbsp; Status: ACTIVE &nbsp;|&nbsp; Next review: After Phase 1 completion &nbsp;|&nbsp; Governance: HGC&sup3;AE&sup2; + Skipjack &nbsp;|&nbsp; Author: Foreman (Architecture Authority) &nbsp;|&nbsp; Generated: 2026-03-26
+  </div>
+
+</div>
+</body>
+</html>
